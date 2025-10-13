@@ -49,5 +49,35 @@
     const cta = document.querySelector('.cta');
     if (cta) cta.addEventListener('click', () => cta.classList.add('seal-reveal'));
   </script>
+  <script>
+  (function enableKeyboardOpen(){
+    const cta = document.querySelector('.cta');
+    if (!cta) return;
+
+    // a11y + focusable
+    cta.setAttribute('role','button');
+    cta.setAttribute('tabindex','0');
+    cta.setAttribute('aria-label','View Verified Demo');
+
+    const go = () => {
+      cta.classList.add('seal-reveal');
+      setTimeout(() => { window.location = cta.href; }, 120);
+    };
+
+    // Global listener so it works even when nothing is focused
+    document.addEventListener('keydown', (e) => {
+      // ignore when typing in inputs/textareas
+      const t = e.target;
+      const typing = t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable);
+      if (typing) return;
+
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        go();
+      }
+    });
+  })();
+</script>
+
 </body>
 </html>
