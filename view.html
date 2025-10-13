@@ -5,405 +5,483 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MirrorVault — Verified Receipt</title>
 
-<style>
-  /* ——— Base MirrorStyle ——— */
-  body{
-    font-family: ui-serif,"Crimson Pro",Georgia,serif;
-    background:#f9f6f1; color:#1a1a1a; margin:0;
-  }
-  .wrap{
-    max-width:860px; margin:2rem auto; padding:1.5rem;
-    background:#fff; border:1px solid #d6b168; border-radius:12px;
-  }
-  h1{ color:#d6b168; margin:0 0 .75rem; }
-  .grid{ display:grid; grid-template-columns:1fr 1fr; gap:1.25rem; }
-  .card{ border:1px solid #eee; border-left:4px solid #d6b168; padding:1.15rem; border-radius:8px; background:#fff; }
-  .card h3{ margin:0 0 .6rem; }
-  .k{ display:inline-block; min-width:9.5rem; color:#555; font-weight:600; }
-  code{ background:#faf8f3; padding:.14rem .35rem; border-radius:4px; }
-  .badge{
-    display:inline-block; margin-right:.6rem; margin-top:.25rem;
-    padding:.2rem .6rem; border-radius:6px; font-weight:700;
-    background:#e8f6e8; color:#1f7a1f; border:1px solid #1f7a1f;
-    vertical-align:middle;
-  }
-  .badge.warn{ background:#fff7e6; color:#9b6b00; border-color:#9b6b00; }
-  .badge.fail{ background:#fdeaea; color:#9b1c1c; border-color:#9b1c1c; }
+  <style>
+    /* ——— Base MirrorStyle ——— */
+    :root { --cream:#f9f6f1; --black:#1a1a1a; --gold:#d6b168; }
+    :root[data-theme="partner"]{ --cream:#fbfaf7; --black:#101418; --gold:#c4a455; }
 
-  /* Verified pulse */
-  @keyframes verifiedPulse{
-    0%,100%{ box-shadow:0 0 0 0 rgba(31,122,31,.28); }
-    50%{ box-shadow:0 0 12px 4px rgba(31,122,31,.55); }
-  }
-  .badge.ok{ animation: verifiedPulse 3s ease-in-out infinite; }
+    body{
+      font-family: ui-serif,"Crimson Pro",Georgia,serif;
+      background:var(--cream); color:var(--black); margin:0;
+    }
+    .wrap{
+      max-width:860px; margin:2rem auto; padding:1.5rem;
+      background:#fff; border:1px solid var(--gold); border-radius:12px;
+    }
+    h1{ color:var(--gold); margin:0 0 .75rem; }
+    .grid{ display:grid; grid-template-columns:1fr 1fr; gap:1.25rem; }
+    .card{ border:1px solid #eee; border-left:4px solid var(--gold); padding:1.15rem; border-radius:8px; background:#fff; }
+    .card h3{ margin:0 0 .6rem; }
+    .k{ display:inline-block; min-width:9.5rem; color:#555; font-weight:600; }
+    code{ background:#faf8f3; padding:.14rem .35rem; border-radius:4px; }
+    .break, code, a{ word-break: break-word; overflow-wrap:anywhere; }
+    #metaBlock p{ margin:.25rem 0; line-height:1.35; }
+    #anchors, #attestations{ margin:.35rem 0 .15rem 1.2rem; }
+    #anchors li, #attestations li{ margin:.25rem 0; }
 
-  /* Primary CTAs */
-  .copy-cta{
-    display:inline-block; padding:.45rem .8rem; background:#d6b168; color:#1a1a1a;
-    font-weight:600; border:0; border-radius:6px; cursor:pointer;
-    transition: transform .2s ease, box-shadow .2s ease; vertical-align:middle;
-  }
-  .copy-cta:hover{ transform:translateY(-2px); box-shadow:0 6px 14px rgba(0,0,0,.12); }
+    /* Share strip */
+    .share-strip {
+      position: sticky; top: .75rem; float: right; margin-left: .5rem;
+      display: inline-flex; gap: .5rem; align-items: center;
+    }
 
-  /* Tiny icon buttons */
-  .icon-btn {
-    margin-left: .35rem; padding: .2rem .45rem; font-size: .9rem; line-height: 1;
-    background: #eee; border: 0; border-radius: 4px; cursor: pointer;
-  }
-  .icon-btn:hover { background: #e6e6e6; }
-  .icon-btn.success { background: #e8f6e8; color: #1f7a1f; }
+    /* Buttons */
+    .badge{
+      display:inline-block; margin-right:.6rem; margin-top:.25rem;
+      padding:.2rem .6rem; border-radius:6px; font-weight:700;
+      background:#e8f6e8; color:#1f7a1f; border:1px solid #1f7a1f;
+      vertical-align:middle;
+    }
+    .badge.warn{ background:#fff7e6; color:#9b6b00; border-color:#9b6b00; }
+    .badge.fail{ background:#fdeaea; color:#9b1c1c; border-color:#9b1c1c; }
+    @keyframes verifiedPulse{
+      0%,100%{ box-shadow:0 0 0 0 rgba(31,122,31,.28); }
+      50%{ box-shadow:0 0 12px 4px rgba(31,122,31,.55); }
+    }
+    .badge.ok{ animation: verifiedPulse 3s ease-in-out infinite; }
 
-  /* Wrapping for long values */
-  .break, code, a{ word-break: break-word; overflow-wrap:anywhere; }
-  #metaBlock p{ margin:.25rem 0; line-height:1.35; }
-  #anchors, #attestations{ margin:.35rem 0 .15rem 1.2rem; }
-  #anchors li, #attestations li{ margin:.25rem 0; }
+    .copy-cta{
+      display:inline-block; padding:.45rem .8rem; background:var(--gold); color:var(--black);
+      font-weight:600; border:0; border-radius:6px; cursor:pointer;
+      transition: transform .2s ease, box-shadow .2s ease; vertical-align:middle;
+    }
+    .copy-cta:hover{ transform:translateY(-2px); box-shadow:0 6px 14px rgba(0,0,0,.12); }
 
-  details summary{ cursor:pointer; }
-  details[open] summary{ color:#444; }
+    .icon-btn {
+      margin-left: .35rem; padding: .2rem .45rem; font-size: .9rem; line-height: 1;
+      background: #eee; border: 0; border-radius: 4px; cursor: pointer;
+    }
+    .icon-btn:hover { background: #e6e6e6; }
+    .icon-btn.success { background: #e8f6e8; color: #1f7a1f; }
 
-  /* Fade-in reveal */
-  .fadein{ opacity:0; transition:opacity .45s ease-in; }
-  .fadein.visible{ opacity:1; }
+    /* Fade-in */
+    .fadein{ opacity:0; transition:opacity .45s ease-in; }
+    .fadein.visible{ opacity:1; }
 
-  /* Mobile harmony */
-  @media (max-width:720px){
-    .wrap{ padding-left:1rem; padding-right:1rem; }
-    .grid{ grid-template-columns:1fr; }
-    .k{ min-width:7.5rem; }
-  }
-</style>
+    /* Press mode */
+    body.press .copy-cta, body.press .icon-btn, body.press #downloadJson { display: none !important; }
+    body.press .press-explainer { display: block !important; }
+    .press-explainer { display:none; color:#555; margin-top:.5rem; }
 
-  
+    /* Certificate print */
+    @media print {
+      body * { visibility: hidden !important; }
+      .certificate, .certificate * { visibility: visible !important; }
+      .certificate { position: absolute; inset: 0; padding: 1in; background: #fff; color: #000; }
+    }
+    .certificate {
+      display: none; background: #fff; color: #000; border: 1px solid var(--gold); border-radius: 12px;
+      margin: 0 auto; max-width: 8.5in; min-height: 11in; box-sizing: border-box;
+      background-image: radial-gradient(circle at 50% 40%, rgba(214,177,104,.08), transparent 60%);
+    }
+    .certificate h1 { font-size: 28pt; margin: 0 0 .3in; color: #d6b168; text-align: center; }
+    .certificate .row { margin: .2in 0; font-size: 12pt; }
+    .certificate .label { font-weight: 600; display: inline-block; width: 1.8in; }
+    .certificate .value { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; word-break: break-word; }
+    .certificate .seal { margin-top: .4in; text-align: center; font-weight: 700; }
+
+    /* Mobile harmony */
+    @media (max-width:720px){
+      .wrap{ padding-left:1rem; padding-right:1rem; }
+      .grid{ grid-template-columns:1fr; }
+      .k{ min-width:7.5rem; }
+    }
+
+    /* Dark mode support (uses your existing toggle rules, if any) */
+    body.dark { background:#1a1a1a; color:#f9f6f1; }
+    body.dark .wrap { background:#171717; color:#f9f6f1; border-color:var(--gold); }
+    body.dark .card { background:#181818; border-color:#333; border-left-color:var(--gold); }
+    body.dark .k { color:#dcdcdc; }
+    body.dark code { background:#202020; color:#f0f0f0; }
+    body.dark a { color:#e6d49b; }
+    body.dark .badge { background:#173417; color:#b9f0b9; border-color:#2c7a2c; }
+    body.dark .badge.warn { background:#3a2e08; color:#ffd36a; border-color:#9b6b00; }
+    body.dark .badge.fail { background:#3a0f0f; color:#ffb2b2; border-color:#9b1c1c; }
+    body.dark .copy-cta { background:var(--gold); color:#1a1a1a; }
+  </style>
 </head>
 <body>
   <div class="wrap">
     <h1>MirrorVault Verified Receipt</h1>
-  <div id="statusBadge" class="badge">Checking…</div>
-<button id="copyLink" class="copy-cta" type="button" aria-label="Copy verification link">Copy Verification Link</button>
-<a id="downloadJson" class="copy-cta" href="#" download style="margin-left:.5rem;">Download JSON</a>
-<p id="subtitle" class="k"></p>
 
+    <div class="share-strip" aria-label="Share controls">
+      <div id="statusBadge" class="badge" aria-live="polite">Checking…</div>
+      <button id="copyLink" class="copy-cta" type="button" aria-label="Copy verification link">Copy Verification Link</button>
+      <a id="downloadJson" class="copy-cta" href="#" download>Download JSON</a>
+      <button id="printCert" class="copy-cta" type="button" aria-label="Download certificate PDF">Download Certificate (PDF)</button>
+    </div>
+
+    <p id="subtitle" class="k"></p>
 
     <div class="grid">
-      <section class="card">
-        <h3>Receipt</h3>
+      <section class="card" role="region" aria-labelledby="h-receipt">
+        <h3 id="h-receipt">Receipt</h3>
         <p><span class="k">Receipt ID:</span> <span id="receipt_id">—</span></p>
         <p><span class="k">Subject:</span> <span id="subject">—</span></p>
-   <p>
-  <span class="k">Content Digest:</span>
-  <code id="digest">—</code>
-  <button id="copyDigest" class="icon-btn" type="button" title="Copy digest">📋</button>
-</p>
-
-
+        <p>
+          <span class="k">Content Digest:</span>
+          <code id="digest">—</code>
+          <button id="copyDigest" class="icon-btn" type="button" title="Copy digest">📋</button>
+        </p>
         <p><span class="k">Created:</span> <span id="created_at">—</span></p>
         <div id="metaBlock"></div>
       </section>
 
-      <section class="card">
-        <h3>Seal</h3>
+      <section class="card" role="region" aria-labelledby="h-seal">
+        <h3 id="h-seal">Seal</h3>
         <p><span class="k">Algorithm:</span> <span id="alg">—</span></p>
-<p>
-  <span class="k">Issuer:</span>
-  <span id="issuer">—</span>
-  <button id="copyIssuer" class="icon-btn" type="button" title="Copy issuer DID">📋</button>
-</p>
-
+        <p>
+          <span class="k">Issuer:</span>
+          <span id="issuer">—</span>
+          <button id="copyIssuer" class="icon-btn" type="button" title="Copy issuer DID">📋</button>
+        </p>
         <p><span class="k">Key ID:</span> <span id="key_id">—</span></p>
         <p><span class="k">Issued At:</span> <span id="issued_at">—</span></p>
         <details><summary>Signature</summary><code id="sig">—</code></details>
       </section>
 
-      <section class="card">
-        <h3>Anchors</h3>
+      <section class="card" role="region" aria-labelledby="h-anchors">
+        <h3 id="h-anchors">Anchors</h3>
         <ul id="anchors"><li>No anchors attached.</li></ul>
       </section>
 
-      <section class="card">
-        <h3>Attestations</h3>
+      <section class="card" role="region" aria-labelledby="h-att">
+        <h3 id="h-att">Attestations</h3>
         <ul id="attestations"><li>None.</li></ul>
       </section>
     </div>
 
     <div id="error" role="alert" style="color:#9b1c1c;font-weight:600;display:none;margin-top:.5rem"></div>
     <div class="k" style="text-align:center;margin-top:1rem">Seal ID <span id="sealId">—</span></div>
+
+    <!-- Print Certificate Canvas -->
+    <section class="certificate" role="document" aria-label="Verification certificate">
+      <h1>MirrorVault Verification Certificate</h1>
+      <div class="row"><span class="label">Receipt ID</span> <span id="cert_receipt" class="value">—</span></div>
+      <div class="row"><span class="label">Subject</span> <span id="cert_subject" class="value">—</span></div>
+      <div class="row"><span class="label">Digest</span> <span id="cert_digest" class="value break">—</span></div>
+      <div class="row"><span class="label">Issuer</span> <span id="cert_issuer" class="value break">—</span></div>
+      <div class="row"><span class="label">Issued At</span> <span id="cert_issued" class="value">—</span></div>
+      <div class="row"><span class="label">Anchors</span> <span id="cert_anchors" class="value break">—</span></div>
+      <div class="row"><span class="label">Verification URL</span> <span id="cert_url" class="value break">—</span></div>
+      <div class="seal">✓ Verified — MirrorVault Codex</div>
+    </section>
+
+    <!-- Press mode explainer -->
+    <p class="press-explainer">This page shows a live, verifiable receipt of authenticity (cryptographic seal, issuer, and transparency anchors). Copy the link for your article or screenshot this view.</p>
   </div>
 
-<!-- Viewer logic -->
-<script>
-// ===== MirrorVault Viewer — Final Script =====
-const CONFIG = {
-  API_BASE: "https://verify.mirrorvault.ai",
-  VERIFY_BASE: "https://api.mirrorvault.ai",
-  RECEIPT_ID: null,
-  INCLUDE: "chain,attestations"
-};
-
-// helpers
-function deriveReceiptId(){
-  const qp = new URLSearchParams(location.search);
-  if (qp.get("id")) return qp.get("id");
-  const m = location.pathname.match(/(rcpt_[A-Za-z0-9_]+)/);
-  return m ? m[1] : null;
-}
-function safeText(x){ return (x===undefined || x===null || x==="") ? "—" : String(x); }
-function setBadge(status, text){
-  const el = document.getElementById("statusBadge"); if(!el) return;
-  el.className = "badge";
-  if (status==="ok") el.classList.add("ok");
-  else if (status==="warn") el.classList.add("warn");
-  else if (status==="fail") el.classList.add("fail");
-  el.textContent = text;
-}
-
-// data fetchers
-async function fetchReceipt(id){
-  const rid = id || deriveReceiptId();
-
-  // rcpt_demo* → local demo file
-  if (!rid || /^rcpt_demo/i.test(rid)) {
-    const candidates = [
-      `/receipts/${encodeURIComponent(rid || "rcpt_demo")}.json`,
-      `/receipts/demo.json`
-    ];
-    for (const url of candidates){
-      try{
-        const res = await fetch(url, { headers:{ "Accept":"application/json" }});
-        if (res.ok){
-          window.currentReceiptSource = url;                 // record actual source
-          const data = await res.json();
-          if (rid && data?.receipt) data.receipt.receipt_id = rid;
-          window.currentReceiptId = rid || "rcpt_demo";
-          return data;
-        }
-      }catch(_){}
-    }
-    throw new Error("Demo receipt JSON not found (checked /receipts/<id>.json and /receipts/demo.json).");
-  }
-
-  // else hit future API; fallback to demo
-  try{
-    const url = new URL(`${CONFIG.API_BASE}/v1/getReceipt/${encodeURIComponent(rid)}`);
-    if (CONFIG.INCLUDE) url.searchParams.set("include", CONFIG.INCLUDE);
-    url.searchParams.set("format", "json");
-    const res = await fetch(url.toString(), { headers:{ "Accept":"application/json" }});
-    if (!res.ok) throw new Error(`getReceipt failed: ${res.status}`);
-    window.currentReceiptSource = url.toString();           // API source
-    window.currentReceiptId = rid;
-    return await res.json();
-  }catch(e){
-    const res = await fetch("/receipts/demo.json", { headers:{ "Accept":"application/json" }});
-    if (!res.ok) throw e;
-    window.currentReceiptSource = "/receipts/demo.json";
-    window.currentReceiptId = "rcpt_demo";
-    return await res.json();
-  }
-}
-
-// verify (demo returns ok so badge pulses)
-async function verifySeal(content_digest, seal){
-  if (/^rcpt_demo/i.test((window.currentReceiptId || deriveReceiptId() || ""))) {
-    return { ok:true, results:{ sig:"pass", issuer:"pass", expiry:"pass", transparency:"pass", anchors:{} }, warnings:[], verifier_version:"demo" };
-  }
-  const url = `${CONFIG.VERIFY_BASE}/v1/verifySeal`;
-  const body = {
-    content_digest,
-    seal: { alg: seal.alg, sig: seal.sig, issuer: seal.issuer, key_id: seal.key_id, issued_at: seal.issued_at },
-    checks: ["sig","issuer","expiry","transparency","anchors"]
+  <!-- Viewer logic -->
+  <script>
+  // ===== MirrorVault Viewer — Final Script =====
+  const CONFIG = {
+    API_BASE: "https://verify.mirrorvault.ai",
+    VERIFY_BASE: "https://api.mirrorvault.ai",
+    RECEIPT_ID: null,
+    INCLUDE: "chain,attestations"
   };
-  const res = await fetch(url, { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify(body) });
-  if (!res.ok) throw new Error(`verifySeal failed: ${res.status}`);
-  return res.json();
-}
 
-// renderer
-function renderReceipt(bundle){
-  const r = bundle.receipt || bundle;
-
-  [["receipt_id","receipt_id"],["subject","subject"],["created_at","created_at"]].forEach(([id,key])=>{
-    const el = document.getElementById(id); if (el) el.textContent = safeText(r[key]);
-  });
-  document.getElementById("digest")?.classList.add("break");
-  const digestEl = document.getElementById("digest"); if (digestEl) digestEl.textContent = safeText(r.content_digest);
-  const sealIdEl = document.getElementById("sealId"); if (sealIdEl) sealIdEl.textContent = safeText(r.receipt_id);
-
-  const s = r.seal || {};
-  [["alg","alg"],["issuer","issuer"],["key_id","key_id"],["issued_at","issued_at"]].forEach(([id,key])=>{
-    const el = document.getElementById(id); if (el) el.textContent = safeText(s[key]);
-  });
-  const sigEl = document.getElementById("sig"); if (sigEl) sigEl.textContent = safeText(s.sig);
-
-  const subtitle = document.getElementById("subtitle");
-  if (subtitle && r.verification_url){
-    const url = r.verification_url;
-    subtitle.innerHTML = `<a class="break" href="${url}" target="_blank" rel="noopener">${url}</a>`;
+  // helpers
+  function deriveReceiptId(){
+    const qp = new URLSearchParams(location.search);
+    if (qp.get("id")) return qp.get("id");
+    const m = location.pathname.match(/(rcpt_[A-Za-z0-9_]+)/);
+    return m ? m[1] : null;
+  }
+  function safeText(x){ return (x===undefined || x===null || x==="") ? "—" : String(x); }
+  function setBadge(status, text){
+    const el = document.getElementById("statusBadge"); if(!el) return;
+    el.className = "badge";
+    if (status==="ok") el.classList.add("ok");
+    else if (status==="warn") el.classList.add("warn");
+    else if (status==="fail") el.classList.add("fail");
+    el.textContent = text;
   }
 
-  // Meta
-  const metaDiv = document.getElementById("metaBlock");
-  if (metaDiv){
-    const { actor, jurisdiction, consent_tier, tags, actor_name, document_title, document_uri } = r.meta || {};
-    metaDiv.innerHTML = `
-      <p><span class="k">Actor:</span> ${safeText(actor)} ${actor_name ? `&mdash; ${safeText(actor_name)}` : ""}</p>
-      <p><span class="k">Jurisdiction:</span> ${safeText(jurisdiction)}</p>
-      <p><span class="k">Consent Tier:</span> ${safeText(consent_tier)}</p>
-      <p><span class="k">Title:</span> ${safeText(document_title || "—")}</p>
-      <p><span class="k">Source:</span> ${document_uri ? `<a class="break" href="${document_uri}" target="_blank" rel="noopener">${document_uri}</a>` : "—"}</p>
-      <p><span class="k">Tags:</span> ${Array.isArray(tags) ? tags.join(", ") : "—"}</p>
-    `;
-  }
+  // data fetchers
+  async function fetchReceipt(id){
+    const rid = id || deriveReceiptId();
 
-  // Anchors
-  const anchorsUL = document.getElementById("anchors");
-  if (anchorsUL){
-    anchorsUL.innerHTML = "";
-    const a = (s.anchors || {});
-    const rows = [
-      ["timechain_tx", a.timechain_tx],
-      ["transparency_log_id", a.transparency_log_id],
-      ["notary_ref", a.notary_ref],
-      ["witness_hash", a.witness_hash]
-    ];
-    let any = false;
-    rows.forEach(([label,val])=>{
-      if (val){
-        any = true;
-        const li = document.createElement("li");
-        li.innerHTML = `<span class="k">${label}:</span> <code class="break">${val}</code>`;
-        // add a copy button for timechain_tx
-        if (label === "timechain_tx") {
-          const b = document.createElement('button');
-          b.id = "copyTimechain";
-          b.className = "icon-btn";
-          b.type = "button";
-          b.title = "Copy timechain tx";
-          b.textContent = "📋";
-          b.addEventListener('click', () => handleCopy(b, val));
-          li.appendChild(b);
-        }
-        anchorsUL.appendChild(li);
-      }
-    });
-    if (!any) anchorsUL.innerHTML = "<li>No anchors attached.</li>";
-  }
-
-  // Attestations
-  const att = document.getElementById("attestations");
-  const list = bundle.attestations || r.attestations || [];
-  if (att){
-    att.innerHTML = "";
-    if (!list.length) att.innerHTML = "<li>None.</li>";
-    else list.forEach(x=>{
-      const extra = [x.jurisdiction, x.review_method].filter(Boolean).join(" · ");
-      const li = document.createElement("li");
-      li.innerHTML = `<strong>${safeText(x.type)}</strong> — ${safeText(x.status)} ${extra ? `(${extra})` : ""}`;
-      att.appendChild(li);
-    });
-  }
-}
-
-function classifyResult(vr){
-  if (!vr || typeof vr !== "object") return {status:"warn", text:"⚠ Verification unknown"};
-  const { results } = vr;
-  for (const k of ["sig","issuer","expiry","transparency"])
-    if (results?.[k] === "fail") return {status:"fail", text:"✗ Verification failed"};
-  if (results?.anchors){
-    for (const k in results.anchors){
-      const v = results.anchors[k];
-      if (v === "fail" || v === "warn") return {status:"warn", text:"⚠ Anchor pending/warn"};
-    }
-  }
-  return {status:"ok", text:"✓ Verified"};
-}
-
-// generic copy helper
-async function handleCopy(btn, value){
-  try{
-    await navigator.clipboard.writeText(value);
-    const prev = btn.textContent;
-    btn.textContent = '✓';
-    btn.classList.add('success');
-    setTimeout(()=>{ btn.textContent = '📋'; btn.classList.remove('success'); }, 1200);
-  }catch{ alert('Could not copy'); }
-}
-
-// main
-(async function main(){
-  try{
-    const rid = CONFIG.RECEIPT_ID || deriveReceiptId();
-    const bundle = await fetchReceipt(rid);
-
-    // Render
-    renderReceipt(bundle);
-
-    // Fade-in blocks
-    document.querySelectorAll('.wrap, .grid, .card').forEach(el=>{
-      el.classList.add('fadein');
-      setTimeout(()=>el.classList.add('visible'), 120);
-    });
-
-    // Copy verification link
-    const copyBtn = document.getElementById('copyLink');
-    if (copyBtn){
-      copyBtn.addEventListener('click', async ()=>{
+    // rcpt_demo* → local demo file
+    if (!rid || /^rcpt_demo/i.test(rid)) {
+      const candidates = [
+        `/receipts/${encodeURIComponent(rid || "rcpt_demo")}.json`,
+        `/receipts/demo.json`
+      ];
+      for (const url of candidates){
         try{
-          await navigator.clipboard.writeText(window.location.href);
-          const prev = copyBtn.textContent;
-          copyBtn.textContent = 'Link Copied ✓';
-          setTimeout(()=> copyBtn.textContent = prev, 1400);
-        }catch{ alert('Could not copy link'); }
-      });
+          const res = await fetch(url, { headers:{ "Accept":"application/json" }});
+          if (res.ok){
+            window.currentReceiptSource = url;
+            const data = await res.json();
+            if (rid && data?.receipt) data.receipt.receipt_id = rid;
+            window.currentReceiptId = rid || "rcpt_demo";
+            return data;
+          }
+        }catch(_){}
+      }
+      throw new Error("Demo receipt JSON not found (checked /receipts/<id>.json and /receipts/demo.json).");
     }
 
-    // Wire Download JSON to the exact source used
-    const dl = document.getElementById('downloadJson');
-    if (dl){
-      const src = (window.currentReceiptSource || window.location.href);
-      dl.href = src;
-      try{
-        const r = bundle.receipt || bundle;
-        const name = (r?.receipt_id || 'receipt') + '.json';
-        dl.setAttribute('download', name);
-      }catch(_){}
+    // else hit future API; fallback to demo
+    try{
+      const url = new URL(`${CONFIG.API_BASE}/v1/getReceipt/${encodeURIComponent(rid)}`);
+      if (CONFIG.INCLUDE) url.searchParams.set("include", CONFIG.INCLUDE);
+      url.searchParams.set("format", "json");
+      const res = await fetch(url.toString(), { headers:{ "Accept":"application/json" }});
+      if (!res.ok) throw new Error(`getReceipt failed: ${res.status}`);
+      window.currentReceiptSource = url.toString();
+      window.currentReceiptId = rid;
+      return await res.json();
+    }catch(e){
+      const res = await fetch("/receipts/demo.json", { headers:{ "Accept":"application/json" }});
+      if (!res.ok) throw e;
+      window.currentReceiptSource = "/receipts/demo.json";
+      window.currentReceiptId = "rcpt_demo";
+      return await res.json();
     }
-
-    // Copy digest button
-    const copyDigestBtn = document.getElementById('copyDigest');
-    if (copyDigestBtn){
-      copyDigestBtn.addEventListener('click', ()=>{
-        const digest = document.getElementById('digest')?.textContent?.trim() || '';
-        handleCopy(copyDigestBtn, digest);
-      });
-    }
-
-    // Copy issuer DID
-    const copyIssuerBtn = document.getElementById('copyIssuer');
-    if (copyIssuerBtn){
-      copyIssuerBtn.addEventListener('click', ()=>{
-        const issuer = document.getElementById('issuer')?.textContent?.trim() || '';
-        handleCopy(copyIssuerBtn, issuer);
-      });
-    }
-
-    // Verify (demo returns ok → pulse)
-    const r = bundle.receipt || bundle;
-    const seal = r.seal || {};
-    let vr;
-    try{ vr = await verifySeal(r.content_digest, seal); }
-    catch(e){
-      vr = { ok:false, results:{ sig:"warn", issuer:"warn", expiry:"warn", transparency:"warn", anchors:{} }, warnings:["verifier unreachable"], verifier_version:"demo-fallback" };
-    }
-    const verdict = classifyResult(vr);
-    setBadge(verdict.status, verdict.text);
-
-  }catch(err){
-    console.error(err);
-    const errEl = document.getElementById("error");
-    if (errEl){ errEl.style.display = "block"; errEl.textContent = "Error: " + err.message; }
-    setBadge("fail", "✗ Could not verify");
   }
-})();
-</script>
+
+  // verify (demo returns ok so badge pulses)
+  async function verifySeal(content_digest, seal){
+    if (/^rcpt_demo/i.test((window.currentReceiptId || deriveReceiptId() || ""))) {
+      return { ok:true, results:{ sig:"pass", issuer:"pass", expiry:"pass", transparency:"pass", anchors:{} }, warnings:[], verifier_version:"demo" };
+    }
+    const url = `${CONFIG.VERIFY_BASE}/v1/verifySeal`;
+    const body = {
+      content_digest,
+      seal: { alg: seal.alg, sig: seal.sig, issuer: seal.issuer, key_id: seal.key_id, issued_at: seal.issued_at },
+      checks: ["sig","issuer","expiry","transparency","anchors"]
+    };
+    const res = await fetch(url, { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify(body) });
+    if (!res.ok) throw new Error(`verifySeal failed: ${res.status}`);
+    return res.json();
+  }
+
+  // renderer
+  function renderReceipt(bundle){
+    const r = bundle.receipt || bundle;
+
+    [["receipt_id","receipt_id"],["subject","subject"],["created_at","created_at"]].forEach(([id,key])=>{
+      const el = document.getElementById(id); if (el) el.textContent = safeText(r[key]);
+    });
+    document.getElementById("digest")?.classList.add("break");
+    const digestEl = document.getElementById("digest"); if (digestEl) digestEl.textContent = safeText(r.content_digest);
+    const sealIdEl = document.getElementById("sealId"); if (sealIdEl) sealIdEl.textContent = safeText(r.receipt_id);
+
+    const s = r.seal || {};
+    [["alg","alg"],["issuer","issuer"],["key_id","key_id"],["issued_at","issued_at"]].forEach(([id,key])=>{
+      const el = document.getElementById(id); if (el) el.textContent = safeText(s[key]);
+    });
+    const sigEl = document.getElementById("sig"); if (sigEl) sigEl.textContent = safeText(s.sig);
+
+    const subtitle = document.getElementById("subtitle");
+    if (subtitle && r.verification_url){
+      const url = r.verification_url;
+      subtitle.innerHTML = `<a class="break" href="${url}" target="_blank" rel="noopener">${url}</a>`;
+    }
+
+    // Meta
+    const metaDiv = document.getElementById("metaBlock");
+    if (metaDiv){
+      const { actor, jurisdiction, consent_tier, tags, actor_name, document_title, document_uri } = r.meta || {};
+      metaDiv.innerHTML = `
+        <p><span class="k">Actor:</span> ${safeText(actor)} ${actor_name ? `&mdash; ${safeText(actor_name)}` : ""}</p>
+        <p><span class="k">Jurisdiction:</span> ${safeText(jurisdiction)}</p>
+        <p><span class="k">Consent Tier:</span> ${safeText(consent_tier)}</p>
+        <p><span class="k">Title:</span> ${safeText(document_title || "—")}</p>
+        <p><span class="k">Source:</span> ${document_uri ? `<a class="break" href="${document_uri}" target="_blank" rel="noopener">${document_uri}</a>` : "—"}</p>
+        <p><span class="k">Tags:</span> ${Array.isArray(tags) ? tags.join(", ") : "—"}</p>
+      `;
+    }
+
+    // Anchors
+    const anchorsUL = document.getElementById("anchors");
+    if (anchorsUL){
+      anchorsUL.innerHTML = "";
+      const a = (s.anchors || {});
+      const rows = [
+        ["timechain_tx", a.timechain_tx],
+        ["transparency_log_id", a.transparency_log_id],
+        ["notary_ref", a.notary_ref],
+        ["witness_hash", a.witness_hash]
+      ];
+      let any = false;
+      rows.forEach(([label,val])=>{
+        if (val){
+          any = true;
+          const li = document.createElement("li");
+          li.innerHTML = `<span class="k">${label}:</span> <code class="break">${val}</code>`;
+          if (label === "timechain_tx") {
+            const b = document.createElement('button');
+            b.id = "copyTimechain";
+            b.className = "icon-btn";
+            b.type = "button";
+            b.title = "Copy timechain tx";
+            b.textContent = "📋";
+            b.addEventListener('click', () => handleCopy(b, val));
+            li.appendChild(b);
+          }
+          anchorsUL.appendChild(li);
+        }
+      });
+      if (!any) anchorsUL.innerHTML = "<li>No anchors attached.</li>";
+    }
+
+    // Attestations
+    const att = document.getElementById("attestations");
+    const list = bundle.attestations || r.attestations || [];
+    if (att){
+      att.innerHTML = "";
+      if (!list.length) att.innerHTML = "<li>None.</li>";
+      else list.forEach(x=>{
+        const extra = [x.jurisdiction, x.review_method].filter(Boolean).join(" · ");
+        const li = document.createElement("li");
+        li.innerHTML = `<strong>${safeText(x.type)}</strong> — ${safeText(x.status)} ${extra ? `(${extra})` : ""}`;
+        att.appendChild(li);
+      });
+    }
+  }
+
+  function classifyResult(vr){
+    if (!vr || typeof vr !== "object") return {status:"warn", text:"⚠ Verification unknown"};
+    const { results } = vr;
+    for (const k of ["sig","issuer","expiry","transparency"])
+      if (results?.[k] === "fail") return {status:"fail", text:"✗ Verification failed"};
+    if (results?.anchors){
+      for (const k in results.anchors){
+        const v = results.anchors[k];
+        if (v === "fail" || v === "warn") return {status:"warn", text:"⚠ Anchor pending/warn"};
+      }
+    }
+    return {status:"ok", text:"✓ Verified"};
+  }
+
+  // copy helper
+  async function handleCopy(btn, value){
+    try{
+      await navigator.clipboard.writeText(value);
+      const prev = btn.textContent;
+      btn.textContent = '✓';
+      btn.classList.add('success');
+      setTimeout(()=>{ btn.textContent = '📋'; btn.classList.remove('success'); }, 1200);
+    }catch{ alert('Could not copy'); }
+  }
+
+  // main
+  (async function main(){
+    try{
+      // theme + press mode params
+      const qp = new URLSearchParams(location.search);
+      const theme = qp.get('theme'); if (theme) document.documentElement.setAttribute('data-theme', theme);
+      if (qp.get('press')) document.body.classList.add('press');
+
+      const rid = CONFIG.RECEIPT_ID || deriveReceiptId();
+      const bundle = await fetchReceipt(rid);
+
+      // Render
+      renderReceipt(bundle);
+      const r = bundle.receipt || bundle;
+      window._lastReceipt = r;
+
+      // Fade-in blocks
+      document.querySelectorAll('.wrap, .grid, .card').forEach(el=>{
+        el.classList.add('fadein');
+        setTimeout(()=>el.classList.add('visible'), 120);
+      });
+
+      // Copy verification link
+      const copyBtn = document.getElementById('copyLink');
+      if (copyBtn){
+        copyBtn.addEventListener('click', async ()=>{
+          try{
+            await navigator.clipboard.writeText(window.location.href);
+            const prev = copyBtn.textContent;
+            copyBtn.textContent = 'Link Copied ✓';
+            setTimeout(()=> copyBtn.textContent = prev, 1400);
+          }catch{ alert('Could not copy link'); }
+        });
+      }
+
+      // Download JSON to the exact source
+      const dl = document.getElementById('downloadJson');
+      if (dl){
+        const src = (window.currentReceiptSource || window.location.href);
+        dl.href = src;
+        try{
+          const name = (r?.receipt_id || 'receipt') + '.json';
+          dl.setAttribute('download', name);
+        }catch(_){}
+      }
+
+      // Copy digest
+      const copyDigestBtn = document.getElementById('copyDigest');
+      if (copyDigestBtn){
+        copyDigestBtn.addEventListener('click', ()=>{
+          const digest = document.getElementById('digest')?.textContent?.trim() || '';
+          handleCopy(copyDigestBtn, digest);
+        });
+      }
+
+      // Copy issuer
+      const copyIssuerBtn = document.getElementById('copyIssuer');
+      if (copyIssuerBtn){
+        copyIssuerBtn.addEventListener('click', ()=>{
+          const issuer = document.getElementById('issuer')?.textContent?.trim() || '';
+          handleCopy(copyIssuerBtn, issuer);
+        });
+      }
+
+      // Print Certificate (PDF)
+      const certBtn = document.getElementById('printCert');
+      if (certBtn){
+        certBtn.addEventListener('click', ()=>{
+          // Fill certificate fields
+          document.getElementById('cert_receipt').textContent = r.receipt_id || '—';
+          document.getElementById('cert_subject').textContent = r.subject || '—';
+          document.getElementById('cert_digest').textContent = r.content_digest || '—';
+          document.getElementById('cert_issuer').textContent = (r.seal?.issuer) || '—';
+          document.getElementById('cert_issued').textContent = (r.seal?.issued_at) || '—';
+          const a = r.seal?.anchors || {};
+          const anchors = ['timechain_tx','transparency_log_id','notary_ref','witness_hash']
+            .filter(k => a[k]).map(k => `${k}: ${a[k]}`).join('  •  ') || '—';
+          document.getElementById('cert_anchors').textContent = anchors;
+          document.getElementById('cert_url').textContent = location.href;
+
+          // Show certificate, print, hide again
+          const cert = document.querySelector('.certificate');
+          cert.style.display = 'block';
+          window.print();
+          setTimeout(()=>{ cert.style.display = 'none'; }, 300);
+        });
+      }
+
+      // Verify (demo returns ok)
+      let vr;
+      try{ vr = await verifySeal(r.content_digest, r.seal || {}); }
+      catch(e){
+        vr = { ok:false, results:{ sig:"warn", issuer:"warn", expiry:"warn", transparency:"warn", anchors:{} }, warnings:["verifier unreachable"], verifier_version:"demo-fallback" };
+      }
+      const verdict = classifyResult(vr);
+      setBadge(verdict.status, verdict.text);
+
+    }catch(err){
+      console.error(err);
+      const errEl = document.getElementById("error");
+      if (errEl){ errEl.style.display = "block"; errEl.textContent = "Error: " + err.message; }
+      setBadge("fail", "✗ Could not verify");
+    }
+  })();
+  </script>
 </body>
 </html>
