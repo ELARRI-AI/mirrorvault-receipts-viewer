@@ -5,126 +5,76 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MirrorVault — Verified Receipt</title>
 
-  <style>
-
-/* tiny icon button next to digest */
-.icon-btn {
-  margin-left: .35rem; padding: .2rem .45rem; font-size: .9rem; line-height: 1;
-  background: #eee; border: 0; border-radius: 4px; cursor: pointer;
-}
-.icon-btn:hover { background: #e6e6e6; }
-.icon-btn.success { background: #e8f6e8; color: #1f7a1f; }
-
-    .icon-btn {
-  margin-left: .35rem; padding: .2rem .45rem; font-size: .9rem; line-height: 1;
-  background: #eee; border: 0; border-radius: 4px; cursor: pointer;
-}
-.icon-btn:hover { background: #e6e6e6; }
-.icon-btn.success { background: #e8f6e8; color: #1f7a1f; }
-
-
-    
-    /* ——— Base MirrorStyle ——— */
-    body{
-      font-family: ui-serif,"Crimson Pro",Georgia,serif;
-      background:#f9f6f1; color:#1a1a1a; margin:0;
-    }
-    .wrap{
-      max-width:860px; margin:2rem auto; padding:1.5rem;
-      background:#fff; border:1px solid #d6b168; border-radius:12px;
-    }
-    h1{ color:#d6b168; margin:0 0 .75rem; }
-    .grid{ display:grid; grid-template-columns:1fr 1fr; gap:1.25rem; }
-    .card{ border:1px solid #eee; border-left:4px solid #d6b168; padding:1.15rem; border-radius:8px; background:#fff; }
-    .card h3{ margin:0 0 .6rem; }
-    .k{ display:inline-block; min-width:9.5rem; color:#555; font-weight:600; }
-    code{ background:#faf8f3; padding:.14rem .35rem; border-radius:4px; }
-    .badge{
-      display:inline-block; margin-right:.6rem; margin-top:.25rem;
-      padding:.2rem .6rem; border-radius:6px; font-weight:700;
-      background:#e8f6e8; color:#1f7a1f; border:1px solid #1f7a1f;
-      vertical-align:middle;
-    }
-    .badge.warn{ background:#fff7e6; color:#9b6b00; border-color:#9b6b00; }
-    .badge.fail{ background:#fdeaea; color:#9b1c1c; border-color:#9b1c1c; }
-
-    /* Verified pulse */
-    @keyframes verifiedPulse{
-      0%,100%{ box-shadow:0 0 0 0 rgba(31,122,31,.28); }
-      50%{ box-shadow:0 0 12px 4px rgba(31,122,31,.55); }
-    }
-    .badge.ok{ animation: verifiedPulse 3s ease-in-out infinite; }
-
-    /* Copy button */
-    .copy-cta{
-      display:inline-block; padding:.45rem .8rem; background:#d6b168; color:#1a1a1a;
-      font-weight:600; border:0; border-radius:6px; cursor:pointer;
-      transition: transform .2s ease, box-shadow .2s ease; vertical-align:middle;
-    }
-    .copy-cta:hover{ transform:translateY(-2px); box-shadow:0 6px 14px rgba(0,0,0,.12); }
-
-    /* Wrapping for long values */
-    .break, code, a{ word-break: break-word; overflow-wrap:anywhere; }
-    #metaBlock p{ margin:.25rem 0; line-height:1.35; }
-    #anchors, #attestations{ margin:.35rem 0 .15rem 1.2rem; }
-    #anchors li, #attestations li{ margin:.25rem 0; }
-
-    details summary{ cursor:pointer; }
-    details[open] summary{ color:#444; }
-
-    /* Fade-in reveal */
-    .fadein{ opacity:0; transition:opacity .45s ease-in; }
-    .fadein.visible{ opacity:1; }
-
-    /* Mobile harmony */
-    @media (max-width:720px){
-      .wrap{ padding-left:1rem; padding-right:1rem; }
-      .grid{ grid-template-columns:1fr; }
-      .k{ min-width:7.5rem; }
-
-// Generic copy helper
-async function handleCopy(btn, value) {
-  try {
-    await navigator.clipboard.writeText(value);
-    const prev = btn.textContent;
-    btn.textContent = '✓';
-    btn.classList.add('success');
-    setTimeout(() => { btn.textContent = '📋'; btn.classList.remove('success'); }, 1200);
-  } catch {
-    alert('Could not copy');
+<style>
+  /* ——— Base MirrorStyle ——— */
+  body{
+    font-family: ui-serif,"Crimson Pro",Georgia,serif;
+    background:#f9f6f1; color:#1a1a1a; margin:0;
   }
-}
+  .wrap{
+    max-width:860px; margin:2rem auto; padding:1.5rem;
+    background:#fff; border:1px solid #d6b168; border-radius:12px;
+  }
+  h1{ color:#d6b168; margin:0 0 .75rem; }
+  .grid{ display:grid; grid-template-columns:1fr 1fr; gap:1.25rem; }
+  .card{ border:1px solid #eee; border-left:4px solid #d6b168; padding:1.15rem; border-radius:8px; background:#fff; }
+  .card h3{ margin:0 0 .6rem; }
+  .k{ display:inline-block; min-width:9.5rem; color:#555; font-weight:600; }
+  code{ background:#faf8f3; padding:.14rem .35rem; border-radius:4px; }
+  .badge{
+    display:inline-block; margin-right:.6rem; margin-top:.25rem;
+    padding:.2rem .6rem; border-radius:6px; font-weight:700;
+    background:#e8f6e8; color:#1f7a1f; border:1px solid #1f7a1f;
+    vertical-align:middle;
+  }
+  .badge.warn{ background:#fff7e6; color:#9b6b00; border-color:#9b6b00; }
+  .badge.fail{ background:#fdeaea; color:#9b1c1c; border-color:#9b1c1c; }
 
-// Digest copy
-const copyDigestBtn = document.getElementById('copyDigest');
-if (copyDigestBtn) {
-  copyDigestBtn.addEventListener('click', () => {
-    const digest = document.getElementById('digest')?.textContent?.trim() || '';
-    handleCopy(copyDigestBtn, digest);
-  });
-}
+  /* Verified pulse */
+  @keyframes verifiedPulse{
+    0%,100%{ box-shadow:0 0 0 0 rgba(31,122,31,.28); }
+    50%{ box-shadow:0 0 12px 4px rgba(31,122,31,.55); }
+  }
+  .badge.ok{ animation: verifiedPulse 3s ease-in-out infinite; }
 
-// Issuer copy
-const copyIssuerBtn = document.getElementById('copyIssuer');
-if (copyIssuerBtn) {
-  copyIssuerBtn.addEventListener('click', () => {
-    const issuer = document.getElementById('issuer')?.textContent?.trim() || '';
-    handleCopy(copyIssuerBtn, issuer);
-  });
-}
+  /* Primary CTAs */
+  .copy-cta{
+    display:inline-block; padding:.45rem .8rem; background:#d6b168; color:#1a1a1a;
+    font-weight:600; border:0; border-radius:6px; cursor:pointer;
+    transition: transform .2s ease, box-shadow .2s ease; vertical-align:middle;
+  }
+  .copy-cta:hover{ transform:translateY(-2px); box-shadow:0 6px 14px rgba(0,0,0,.12); }
 
-// Timechain TX copy
-const copyTimechainBtn = document.getElementById('copyTimechain');
-if (copyTimechainBtn) {
-  copyTimechainBtn.addEventListener('click', () => {
-    const tx = document.querySelector('#anchors code')?.textContent?.trim() || '';
-    handleCopy(copyTimechainBtn, tx);
-  });
-}
+  /* Tiny icon buttons */
+  .icon-btn {
+    margin-left: .35rem; padding: .2rem .45rem; font-size: .9rem; line-height: 1;
+    background: #eee; border: 0; border-radius: 4px; cursor: pointer;
+  }
+  .icon-btn:hover { background: #e6e6e6; }
+  .icon-btn.success { background: #e8f6e8; color: #1f7a1f; }
 
-      
-    }
-  </style>
+  /* Wrapping for long values */
+  .break, code, a{ word-break: break-word; overflow-wrap:anywhere; }
+  #metaBlock p{ margin:.25rem 0; line-height:1.35; }
+  #anchors, #attestations{ margin:.35rem 0 .15rem 1.2rem; }
+  #anchors li, #attestations li{ margin:.25rem 0; }
+
+  details summary{ cursor:pointer; }
+  details[open] summary{ color:#444; }
+
+  /* Fade-in reveal */
+  .fadein{ opacity:0; transition:opacity .45s ease-in; }
+  .fadein.visible{ opacity:1; }
+
+  /* Mobile harmony */
+  @media (max-width:720px){
+    .wrap{ padding-left:1rem; padding-right:1rem; }
+    .grid{ grid-template-columns:1fr; }
+    .k{ min-width:7.5rem; }
+  }
+</style>
+
+  
 </head>
 <body>
   <div class="wrap">
@@ -182,7 +132,7 @@ if (copyTimechainBtn) {
 
 <!-- Viewer logic -->
 <script>
-// ===== MirrorVault Viewer — Full Drop-in Script (final) =====
+// ===== MirrorVault Viewer — Final Script =====
 const CONFIG = {
   API_BASE: "https://verify.mirrorvault.ai",
   VERIFY_BASE: "https://api.mirrorvault.ai",
@@ -190,7 +140,7 @@ const CONFIG = {
   INCLUDE: "chain,attestations"
 };
 
-// ---------- helpers ----------
+// helpers
 function deriveReceiptId(){
   const qp = new URLSearchParams(location.search);
   if (qp.get("id")) return qp.get("id");
@@ -207,7 +157,7 @@ function setBadge(status, text){
   el.textContent = text;
 }
 
-// ---------- data fetchers ----------
+// data fetchers
 async function fetchReceipt(id){
   const rid = id || deriveReceiptId();
 
@@ -251,9 +201,8 @@ async function fetchReceipt(id){
   }
 }
 
-// ---------- verify ----------
+// verify (demo returns ok so badge pulses)
 async function verifySeal(content_digest, seal){
-  // Demo shortcut: force green so the badge pulses
   if (/^rcpt_demo/i.test((window.currentReceiptId || deriveReceiptId() || ""))) {
     return { ok:true, results:{ sig:"pass", issuer:"pass", expiry:"pass", transparency:"pass", anchors:{} }, warnings:[], verifier_version:"demo" };
   }
@@ -268,7 +217,7 @@ async function verifySeal(content_digest, seal){
   return res.json();
 }
 
-// ---------- renderers ----------
+// renderer
 function renderReceipt(bundle){
   const r = bundle.receipt || bundle;
 
@@ -312,7 +261,6 @@ function renderReceipt(bundle){
     const a = (s.anchors || {});
     const rows = [
       ["timechain_tx", a.timechain_tx],
-      <button id="copyTimechain" class="icon-btn" type="button" title="Copy timechain tx">📋</button>
       ["transparency_log_id", a.transparency_log_id],
       ["notary_ref", a.notary_ref],
       ["witness_hash", a.witness_hash]
@@ -323,6 +271,17 @@ function renderReceipt(bundle){
         any = true;
         const li = document.createElement("li");
         li.innerHTML = `<span class="k">${label}:</span> <code class="break">${val}</code>`;
+        // add a copy button for timechain_tx
+        if (label === "timechain_tx") {
+          const b = document.createElement('button');
+          b.id = "copyTimechain";
+          b.className = "icon-btn";
+          b.type = "button";
+          b.title = "Copy timechain tx";
+          b.textContent = "📋";
+          b.addEventListener('click', () => handleCopy(b, val));
+          li.appendChild(b);
+        }
         anchorsUL.appendChild(li);
       }
     });
@@ -358,7 +317,18 @@ function classifyResult(vr){
   return {status:"ok", text:"✓ Verified"};
 }
 
-// ---------- main ----------
+// generic copy helper
+async function handleCopy(btn, value){
+  try{
+    await navigator.clipboard.writeText(value);
+    const prev = btn.textContent;
+    btn.textContent = '✓';
+    btn.classList.add('success');
+    setTimeout(()=>{ btn.textContent = '📋'; btn.classList.remove('success'); }, 1200);
+  }catch{ alert('Could not copy'); }
+}
+
+// main
 (async function main(){
   try{
     const rid = CONFIG.RECEIPT_ID || deriveReceiptId();
@@ -401,19 +371,22 @@ function classifyResult(vr){
     // Copy digest button
     const copyDigestBtn = document.getElementById('copyDigest');
     if (copyDigestBtn){
-      copyDigestBtn.addEventListener('click', async ()=>{
-        try{
-          const digest = document.getElementById('digest')?.textContent?.trim() || '';
-        await navigator.clipboard.writeText(digest);
-          const prev = copyDigestBtn.textContent;
-          copyDigestBtn.textContent = '✓';
-          copyDigestBtn.classList.add('success');
-          setTimeout(()=>{ copyDigestBtn.textContent = '📋'; copyDigestBtn.classList.remove('success'); }, 1200);
-        }catch{ alert('Could not copy digest'); }
+      copyDigestBtn.addEventListener('click', ()=>{
+        const digest = document.getElementById('digest')?.textContent?.trim() || '';
+        handleCopy(copyDigestBtn, digest);
       });
     }
 
-    // Verify (demo returns ok)
+    // Copy issuer DID
+    const copyIssuerBtn = document.getElementById('copyIssuer');
+    if (copyIssuerBtn){
+      copyIssuerBtn.addEventListener('click', ()=>{
+        const issuer = document.getElementById('issuer')?.textContent?.trim() || '';
+        handleCopy(copyIssuerBtn, issuer);
+      });
+    }
+
+    // Verify (demo returns ok → pulse)
     const r = bundle.receipt || bundle;
     const seal = r.seal || {};
     let vr;
@@ -432,3 +405,5 @@ function classifyResult(vr){
   }
 })();
 </script>
+</body>
+</html>
