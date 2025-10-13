@@ -1,0 +1,89 @@
+{
+  "receipt": {
+    "receipt_id": "rcpt_demo_11_11_codex",
+    "subject": "ele.output.article.v1",
+    "description": "This demo receipt represents a verified proof of publication for an ELE Codex artifact. It demonstrates how MirrorVault receipts capture cryptographic evidence, legal metadata, and chain-of-custody attestations in a human- and machine-readable format.",
+    "content_digest": "sha256:b2e8b56337d3b54f29ea99899da7ac9e902c056a58269be0a7d85c0d30c88fe1",
+    "meta": {
+      "actor": "did:key:z6MkhDemoSigner",
+      "actor_name": "ELARRI Codex Engine",
+      "jurisdiction": "US-TX",
+      "consent_tier": "witness-v2",
+      "issued_by": "MirrorVault Proof Authority",
+      "tags": [
+        "demo",
+        "public-note",
+        "proof-of-integrity",
+        "codex-v1"
+      ],
+      "document_title": "The Future of Verifiable Trust",
+      "document_uri": "https://example.com/docs/future-of-verifiable-trust.pdf"
+    },
+    "seal": {
+      "alg": "ed25519",
+      "sig": "YmFzZTY0U2lnbmF0dXJlRGVtb0RhdGFFeGFtcGxlPT0=",
+      "issuer": "did:web:verify.mirrorvault.ai",
+      "key_id": "issuer-key-demo-2025",
+      "issued_at": "2025-10-12T20:45:00Z",
+      "anchors": {
+        "timechain_tx": "0xabc123demo",
+        "transparency_log_id": "log_demo_001",
+        "notary_ref": "notary-demo",
+        "witness_hash": "sha256:f49a4419c65a4b4b9e742a4cd7708d7a79cdd7b1d544d6db3a589f91e0300fbb"
+      }
+    },
+    "verification_url": "https://verify.mirrorvault.ai/view.html?id=rcpt_demo_11_11_codex",
+    "created_at": "2025-10-12T20:45:00Z",
+    "last_verified_at": "2025-10-12T21:00:00Z",
+    "status": "verified"
+  },
+  "attestations": [
+    {
+      "type": "origin",
+      "status": "verified",
+      "jurisdiction": "US",
+      "evidence_uri": "https://mirrorvault.ai/attestations/demo/origin",
+      "rebuttal_uri": null,
+      "issuer": "did:web:attestor.mirrorvault.ai",
+      "review_method": "Automated digest verification + timestamp inclusion proof.",
+      "signature": "c2lnbmVkQXR0ZXN0YXRpb25FeGFtcGxlPT0="
+    },
+    {
+      "type": "accuracy",
+      "status": "verified",
+      "jurisdiction": "US",
+      "evidence_uri": "https://mirrorvault.ai/attestations/demo/accuracy",
+      "issuer": "did:web:attestor.codex-lab.ai",
+      "review_method": "Manual checksum comparison with original PDF.",
+      "signature": "YWNjdXJhY3lDaGVja0V4YW1wbGU9PT0="
+    },
+    {
+      "type": "governance",
+      "status": "verified",
+      "jurisdiction": "US",
+      "issuer": "did:web:attestor.gov.mirrorvault.ai",
+      "evidence_uri": "https://mirrorvault.ai/attestations/demo/governance",
+      "review_method": "Policy-level validation against 11.11 Codex ruleset.",
+      "signature": "Z292ZXJuYW5jZVNpZ25hdHVyZURlbW9FeGFtcGxlPT0="
+    }
+  ],
+  "validator_output": {
+    "pdfa_compliant": true,
+    "pdfa_profile": "PDF/A-2b",
+    "validator_sig": "dmFsaWRhdG9yU2lnbmF0dXJlRGVtb0RhdGE9PT0=",
+    "preflight_report": {
+      "uri": "https://mirrorvault.ai/preflight/demo-report.json",
+      "hash": "sha256:aa03dc12f7b67edc72f86ed4ef3fdf09edff0c56b19c41a540d98762b9af3b2b"
+    },
+    "anchors": {
+      "transparency_log_id": "log_validator_demo_002",
+      "timechain_tx": "0xdef456validator"
+    },
+    "issued_at": "2025-10-12T20:46:30Z"
+  },
+  "summary": {
+    "message": "This record demonstrates a valid, end-to-end proof flow — from content hashing through signature sealing and anchor verification — in accordance with the MirrorVault Codex 11.11 specification.",
+    "verification_result": "All checks passed. Receipt verified successfully.",
+    "verifier_version": "2025.10.1"
+  }
+}
