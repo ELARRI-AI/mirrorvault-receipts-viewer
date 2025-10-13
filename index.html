@@ -11,6 +11,36 @@
     @keyframes pulse { 0%,100%{box-shadow:0 0 6px 2px rgba(214,177,104,.4)} 50%{box-shadow:0 0 12px 4px rgba(214,177,104,.8)} }
     @keyframes sealFlash { 0%{box-shadow:0 0 0 0 rgba(214,177,104,0)} 20%{box-shadow:0 0 18px 6px rgba(214,177,104,.75)} 100%{box-shadow:0 0 0 0 rgba(214,177,104,0)} }
 
+/* Dark mode palette */
+body.dark { background:#1a1a1a; color:#f9f6f1; }
+body.dark .wrap { background:#171717; color:#f9f6f1; border-color:#d6b168; }
+body.dark .card { background:#181818; border-color:#333; border-left-color:#d6b168; }
+body.dark .k { color:#dcdcdc; }
+body.dark code { background:#202020; color:#f0f0f0; }
+body.dark a { color:#e6d49b; }
+body.dark .badge { background:#173417; color:#b9f0b9; border-color:#2c7a2c; }
+body.dark .badge.warn { background:#3a2e08; color:#ffd36a; border-color:#9b6b00; }
+body.dark .badge.fail { background:#3a0f0f; color:#ffb2b2; border-color:#9b1c1c; }
+body.dark .copy-cta { background:#d6b168; color:#1a1a1a; }
+
+/* Dark-mode pulse still visible */
+body.dark .badge.ok { box-shadow:none; }
+
+    
+/* Title + subtitle rhythm */
+main { margin-top: 1.9rem; }
+main h1 { letter-spacing: .02em; margin-bottom: 1.1rem; line-height: 1.18; }
+main h2 { margin-bottom: .65rem; line-height: 1.35; }
+main p  { max-width: 560px; margin: .25rem auto 0; line-height: 1.6; }
+
+/* Center the sigil / text more visually */
+body { display: grid; place-items: center; }
+main { text-align: center; }
+
+/* Slightly larger hit area for CTA */
+.cta { padding: .85rem 1.65rem; border: 0; }
+
+    
     body { margin:0; background:var(--cream); color:var(--black); font-family:"Crimson Pro", serif;
            min-height:100vh; display:flex; align-items:center; justify-content:center; text-align:center; overflow:hidden; }
     .sigil { width:120px; height:120px; border:2px solid var(--gold); border-radius:50%; display:flex; align-items:center; justify-content:center;
@@ -33,6 +63,14 @@
   </style>
 </head>
 <body>
+
+<button id="themeToggle"
+        aria-label="Toggle theme"
+        style="position:fixed;right:14px;top:14px;background:none;border:0;font-size:1.1rem;cursor:pointer">
+  🌙
+</button>
+
+  
   <div class="sigil"></div>
   <main>
     <h1>MirrorVault Receipts</h1>
@@ -77,6 +115,28 @@
       }
     });
   })();
+
+// --- Dark mode toggle with persistence + system default ---
+(function themeInit(){
+  const btn = document.getElementById('themeToggle');
+  if (!btn) return;
+
+  const LS_KEY = 'mirrorvault-theme';
+  const set = (mode) => {
+    document.body.classList.toggle('dark', mode === 'dark');
+    btn.textContent = document.body.classList.contains('dark') ? '☀️' : '🌙';
+    localStorage.setItem(LS_KEY, document.body.classList.contains('dark') ? 'dark' : 'light');
+  };
+
+  // Load saved pref or system pref
+  const saved = localStorage.getItem(LS_KEY);
+  if (saved) set(saved);
+  else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) set('dark');
+
+  btn.addEventListener('click', () => set(document.body.classList.contains('dark') ? 'light' : 'dark'));
+})();
+
+    
 </script>
 
 </body>
