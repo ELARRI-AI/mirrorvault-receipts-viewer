@@ -84,240 +84,196 @@
 
   <!-- Use the drop-in script you pasted earlier -->
 
-// ===== MirrorVault Viewer — Full Drop-in Script (fixed) =====
+  <!-- Viewer logic -->
+  <script>
+  // ===== MirrorVault Viewer — Full Drop-in Script (fixed) =====
 
-// Launch config (demo points to same host; switch VERIFY_BASE later)
-const CONFIG = {
-  API_BASE: "https://verify.mirrorvault.ai",  // serves /receipts/*.json for demo
-  VERIFY_BASE: "https://api.mirrorvault.ai",  // real verifier later
-  RECEIPT_ID: null,
-  INCLUDE: "chain,attestations"
-};
-
-// ---------- helpers ----------
-function deriveReceiptId() {
-  const qp = new URLSearchParams(location.search);
-  if (qp.get("id")) return qp.get("id");
-  const m = location.pathname.match(/(rcpt_[A-Za-z0-9_]+)/);
-  return m ? m[1] : null;
-}
-function safeText(x){ return (x===undefined || x===null || x==="") ? "—" : String(x); }
-function setBadge(status, text) {
-  const el = document.getElementById("statusBadge");
-  if (!el) return;
-  el.className = "badge";
-  if (status === "ok") el.classList.add("ok");
-  else if (status === "warn") el.classList.add("warn");
-  else if (status === "fail") el.classList.add("fail");
-  el.textContent = text;
-}
-
-// ---------- data fetchers ----------
-async function fetchReceipt(id) {
-  const rid = id || deriveReceiptId();
-
-  // Treat any rcpt_demo* as local demo
-  if (!rid || /^rcpt_demo/i.test(rid)) {
-    const candidates = [
-      `/receipts/${encodeURIComponent(rid || "rcpt_demo")}.json`,
-      `/receipts/demo.json`
-    ];
-    for (const url of candidates) {
-      try {
-        const res = await fetch(url, { headers: { "Accept":"application/json" }});
-        if (res.ok) {
-          const data = await res.json();
-          if (rid && data?.receipt) data.receipt.receipt_id = rid; // pretty ID on page
-          window.currentReceiptId = rid || "rcpt_demo";
-          return data;
-        }
-      } catch(_) {}
-    }
-    throw new Error("Demo receipt JSON not found (checked /receipts/<id>.json and /receipts/demo.json).");
-  }
-
-  // Otherwise hit the (future) live API; fall back to demo if not ready
-  try {
-    const url = new URL(`${CONFIG.API_BASE}/v1/getReceipt/${encodeURIComponent(rid)}`);
-    if (CONFIG.INCLUDE) url.searchParams.set("include", CONFIG.INCLUDE);
-    url.searchParams.set("format", "json");
-    const res = await fetch(url.toString(), { headers: { "Accept": "application/json" }});
-    if (!res.ok) throw new Error(`getReceipt failed: ${res.status}`);
-    window.currentReceiptId = rid;
-    return await res.json();
-  } catch (e) {
-    const res = await fetch("/receipts/demo.json", { headers: { "Accept":"application/json" }});
-    if (!res.ok) throw e;
-    const data = await res.json();
-    window.currentReceiptId = "rcpt_demo";
-    return data;
-  }
-}
-
-async function verifySeal(content_digest, seal) {
-  // DEMO shortcut (optional): force green badge for local demo
-  /*
-  if (/^rcpt_demo/i.test((window.currentReceiptId || deriveReceiptId() || ""))) {
-    return { ok: true, results: { sig:"pass", issuer:"pass", expiry:"pass", transparency:"pass", anchors:{} }, warnings: [], verifier_version: "demo" };
-  }
-  */
-  const url = `${CONFIG.VERIFY_BASE}/v1/verifySeal`;
-  const body = {
-    content_digest,
-    seal: { alg: seal.alg, sig: seal.sig, issuer: seal.issuer, key_id: seal.key_id, issued_at: seal.issued_at },
-    checks: ["sig","issuer","expiry","transparency","anchors"]
+  // Launch config (demo points to same host; switch VERIFY_BASE later)
+  const CONFIG = {
+    API_BASE: "https://verify.mirrorvault.ai",
+    VERIFY_BASE: "https://api.mirrorvault.ai",
+    RECEIPT_ID: null,
+    INCLUDE: "chain,attestations"
   };
-  const res = await fetch(url, { method:"POST", headers: { "Content-Type":"application/json" }, body: JSON.stringify(body) });
-  if (!res.ok) throw new Error(`verifySeal failed: ${res.status}`);
-  return res.json();
-}
 
-// ---------- renderers ----------
-function renderReceipt(bundle) {
-  const r = bundle.receipt || bundle;
-
-  [["receipt_id","receipt_id"],["subject","subject"],["created_at","created_at"]].forEach(([id,key]) => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = safeText(r[key]);
-  });
-  const digestEl = document.getElementById("digest"); if (digestEl) digestEl.textContent = safeText(r.content_digest);
-  const sealIdEl = document.getElementById("sealId"); if (sealIdEl) sealIdEl.textContent = safeText(r.receipt_id);
-
-  const s = r.seal || {};
-  [["alg","alg"],["issuer","issuer"],["key_id","key_id"],["issued_at","issued_at"]].forEach(([id,key]) => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = safeText(s[key]);
-  });
-  const sigEl = document.getElementById("sig"); if (sigEl) sigEl.textContent = safeText(s.sig);
-
-  const subtitle = document.getElementById("subtitle");
-  if (subtitle && r.verification_url) subtitle.textContent = r.verification_url;
-
-  // Meta
-  const metaDiv = document.getElementById("metaBlock");
-  if (metaDiv) {
-    const { actor, jurisdiction, consent_tier, tags, actor_name, document_title, document_uri } = r.meta || {};
-    metaDiv.innerHTML = `
-      <p><span class="k">Actor:</span> ${safeText(actor)} ${actor_name ? `&mdash; ${safeText(actor_name)}` : ""}</p>
-      <p><span class="k">Jurisdiction:</span> ${safeText(jurisdiction)}</p>
-      <p><span class="k">Consent Tier:</span> ${safeText(consent_tier)}</p>
-      <p><span class="k">Title:</span> ${safeText(document_title || "—")}</p>
-      <p><span class="k">Source:</span> ${document_uri ? `<a href="${document_uri}" target="_blank" rel="noopener">${document_uri}</a>` : "—"}</p>
-      <p><span class="k">Tags:</span> ${Array.isArray(tags) ? tags.join(", ") : "—"}</p>
-    `;
+  // ---------- helpers ----------
+  function deriveReceiptId() {
+    const qp = new URLSearchParams(location.search);
+    if (qp.get("id")) return qp.get("id");
+    const m = location.pathname.match(/(rcpt_[A-Za-z0-9_]+)/);
+    return m ? m[1] : null;
+  }
+  function safeText(x){ return (x===undefined || x===null || x==="") ? "—" : String(x); }
+  function setBadge(status, text) {
+    const el = document.getElementById("statusBadge");
+    if (!el) return;
+    el.className = "badge";
+    if (status === "ok") el.classList.add("ok");
+    else if (status === "warn") el.classList.add("warn");
+    else if (status === "fail") el.classList.add("fail");
+    el.textContent = text;
   }
 
-  // Anchors
-  const anchorsUL = document.getElementById("anchors");
-  if (anchorsUL) {
-    anchorsUL.innerHTML = "";
-    const a = (s.anchors || {});
-    const rows = [
-      ["timechain_tx", a.timechain_tx],
-      ["transparency_log_id", a.transparency_log_id],
-      ["notary_ref", a.notary_ref],
-      ["witness_hash", a.witness_hash]
-    ];
-    let any = false;
-    rows.forEach(([label, val]) => {
-      if (val) {
-        any = true;
-        const li = document.createElement("li");
-        li.innerHTML = `<span class="k">${label}:</span> <code>${val}</code>`;
-        anchorsUL.appendChild(li);
+  // ---------- data fetchers ----------
+  async function fetchReceipt(id) {
+    const rid = id || deriveReceiptId();
+
+    // Treat any rcpt_demo* as local demo
+    if (!rid || /^rcpt_demo/i.test(rid)) {
+      const candidates = [
+        `/receipts/${encodeURIComponent(rid || "rcpt_demo")}.json`,
+        `/receipts/demo.json`
+      ];
+      for (const url of candidates) {
+        try {
+          const res = await fetch(url, { headers: { "Accept":"application/json" }});
+          if (res.ok) {
+            const data = await res.json();
+            if (rid && data?.receipt) data.receipt.receipt_id = rid; // pretty ID on page
+            window.currentReceiptId = rid || "rcpt_demo";
+            return data;
+          }
+        } catch(_) {}
       }
-    });
-    if (!any) anchorsUL.innerHTML = "<li>No anchors attached.</li>";
-  }
-
-  // Attestations
-  const att = document.getElementById("attestations");
-  const list = bundle.attestations || r.attestations || [];
-  if (att) {
-    att.innerHTML = "";
-    if (!list.length) {
-      att.innerHTML = "<li>None.</li>";
-    } else {
-      list.forEach(x => {
-        const li = document.createElement("li");
-        const extra = [x.jurisdiction, x.review_method].filter(Boolean).join(" · ");
-        li.innerHTML = `<strong>${safeText(x.type)}</strong> — ${safeText(x.status)} ${extra ? `(${extra})` : ""}`;
-        att.appendChild(li);
-      });
+      throw new Error("Demo receipt JSON not found (checked /receipts/<id>.json and /receipts/demo.json).");
     }
-  }
-}
 
-function classifyResult(vr) {
-  if (!vr || typeof vr !== "object") return {status:"warn", text:"⚠ Verification unknown"};
-  const { results } = vr;
-  for (const k of ["sig","issuer","expiry","transparency"]) {
-    if (results?.[k] === "fail") return {status:"fail", text:"✗ Verification failed"};
-  }
-  if (results?.anchors) {
-    for (const k in results.anchors) {
-      const v = results.anchors[k];
-      if (v === "fail" || v === "warn") return {status:"warn", text:"⚠ Anchor pending/warn"};
-    }
-  }
-  return {status:"ok", text:"✓ Verified"};
-}
-
-// ---------- main ----------
-(async function main(){
-  try {
-    const rid = CONFIG.RECEIPT_ID || deriveReceiptId();
-    const bundle = await fetchReceipt(rid);
-    renderReceipt(bundle);
-
-    const r = bundle.receipt || bundle;
-    const seal = r.seal || {};
-    let vr;
+    // Otherwise hit the (future) live API; fall back to demo if not ready
     try {
-      vr = await verifySeal(r.content_digest, seal);
+      const url = new URL(`${CONFIG.API_BASE}/v1/getReceipt/${encodeURIComponent(rid)}`);
+      if (CONFIG.INCLUDE) url.searchParams.set("include", CONFIG.INCLUDE);
+      url.searchParams.set("format", "json");
+      const res = await fetch(url.toString(), { headers: { "Accept": "application/json" }});
+      if (!res.ok) throw new Error(`getReceipt failed: ${res.status}`);
+      window.currentReceiptId = rid;
+      return await res.json();
     } catch (e) {
-      vr = { ok:false, results:{ sig:"warn", issuer:"warn", expiry:"warn", transparency:"warn", anchors:{} }, warnings:["verifier unreachable"], verifier_version:"demo-fallback" };
+      const res = await fetch("/receipts/demo.json", { headers: { "Accept":"application/json" }});
+      if (!res.ok) throw e;
+      const data = await res.json();
+      window.currentReceiptId = "rcpt_demo";
+      return data;
     }
-    const verdict = classifyResult(vr);
-    setBadge(verdict.status, verdict.text);
-
-  } catch (err) {
-    console.error(err);
-    const errEl = document.getElementById("error");
-    if (errEl) { errEl.style.display = "block"; errEl.textContent = "Error: " + err.message; }
-    setBadge("fail", "✗ Could not verify");
   }
-})();
-</script>
 
-
-      <script>
-  (function enableKeyboardShortcut(){
-    const cta = document.querySelector('.cta');
-    if (!cta) return;
-
-    // Make focusable for tab navigation
-    cta.setAttribute('role', 'button');
-    cta.setAttribute('tabindex', '0');
-    cta.setAttribute('aria-label', 'View Verified Demo');
-
-    const trigger = () => {
-      cta.classList.add('seal-reveal');
-      // small delay so the flash shows
-      setTimeout(() => { window.location = cta.href; }, 120);
+  async function verifySeal(content_digest, seal) {
+    // DEMO shortcut (optional)
+    /*
+    if (/^rcpt_demo/i.test((window.currentReceiptId || deriveReceiptId() || ""))) {
+      return { ok: true, results: { sig:"pass", issuer:"pass", expiry:"pass", transparency:"pass", anchors:{} }, warnings: [], verifier_version: "demo" };
+    }
+    */
+    const url = `${CONFIG.VERIFY_BASE}/v1/verifySeal`;
+    const body = {
+      content_digest,
+      seal: { alg: seal.alg, sig: seal.sig, issuer: seal.issuer, key_id: seal.key_id, issued_at: seal.issued_at },
+      checks: ["sig","issuer","expiry","transparency","anchors"]
     };
+    const res = await fetch(url, { method:"POST", headers: { "Content-Type":"application/json" }, body: JSON.stringify(body) });
+    if (!res.ok) throw new Error(`verifySeal failed: ${res.status}`);
+    return res.json();
+  }
 
-    // Trigger on Enter or Space
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        trigger();
-      }
+  // ---------- renderers ----------
+  function renderReceipt(bundle) {
+    const r = bundle.receipt || bundle;
+
+    [["receipt_id","receipt_id"],["subject","subject"],["created_at","created_at"]].forEach(([id,key]) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = safeText(r[key]);
     });
-  })();
-</script>
+    const digestEl = document.getElementById("digest"); if (digestEl) digestEl.textContent = safeText(r.content_digest);
+    const sealIdEl = document.getElementById("sealId"); if (sealIdEl) sealIdEl.textContent = safeText(r.receipt_id);
 
-</body>
-</html>
+    const s = r.seal || {};
+    [["alg","alg"],["issuer","issuer"],["key_id","key_id"],["issued_at","issued_at"]].forEach(([id,key]) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = safeText(s[key]);
+    });
+    const sigEl = document.getElementById("sig"); if (sigEl) sigEl.textContent = safeText(s.sig);
 
+    const subtitle = document.getElementById("subtitle");
+    if (subtitle && r.verification_url) subtitle.textContent = r.verification_url;
 
+    // Meta
+    const metaDiv = document.getElementById("metaBlock");
+    if (metaDiv) {
+      const { actor, jurisdiction, consent_tier, tags, actor_name, document_title, document_uri } = r.meta || {};
+      metaDiv.innerHTML = `
+        <p><span class="k">Actor:</span> ${safeText(actor)} ${actor_name ? `&mdash; ${safeText(actor_name)}` : ""}</p>
+        <p><span class="k">Jurisdiction:</span> ${safeText(jurisdiction)}</p>
+        <p><span class="k">Consent Tier:</span> ${safeText(consent_tier)}</p>
+        <p><span class="k">Title:</span> ${safeText(document_title || "—")}</p>
+        <p><span class="k">Source:</span> ${document_uri ? `<a href="${document_uri}" target="_blank" rel="noopener">${document_uri}</a>` : "—"}</p>
+        <p><span class="k">Tags:</span> ${Array.isArray(tags) ? tags.join(", ") : "—"}</p>
+      `;
+    }
+
+    // Anchors
+    const anchorsUL = document.getElementById("anchors");
+    if (anchorsUL) {
+      anchorsUL.innerHTML = "";
+      const a = (s.anchors || {});
+      const rows = [
+        ["timechain_tx", a.timechain_tx],
+        ["transparency_log_id", a.transparency_log_id],
+        ["notary_ref", a.notary_ref],
+        ["witness_hash", a.witness_hash]
+      ];
+      let any = false;
+      rows.forEach(([label, val]) => {
+        if (val) {
+          any = true;
+          const li = document.createElement("li");
+          li.innerHTML = `<span class="k">${label}:</span> <code>${val}</code>`;
+          anchorsUL.appendChild(li);
+        }
+      });
+      if (!any) anchorsUL.innerHTML = "<li>No anchors attached.</li>";
+    }
+
+    // Attestations
+    const att = document.getElementById("attestations");
+    const list = bundle.attestations || r.attestations || [];
+    if (att) {
+      att.innerHTML = "";
+      if (!list.length) {
+        att.innerHTML = "<li>None.</li>";
+      } else {
+        list.forEach(x => {
+          const li = document.createElement("li");
+          const extra = [x.jurisdiction, x.review_method].filter(Boolean).join(" · ");
+          li.innerHTML = `<strong>${safeText(x.type)}</strong> — ${safeText(x.status)} ${extra ? `(${extra})` : ""}`;
+          att.appendChild(li);
+        });
+      }
+    }
+  }
+
+  function classifyResult(vr) {
+    if (!vr || typeof vr !== "object") return {status:"warn", text:"⚠ Verification unknown"};
+    const { results } = vr;
+    for (const k of ["sig","issuer","expiry","transparency"]) {
+      if (results?.[k] === "fail") return {status:"fail", text:"✗ Verification failed"};
+    }
+    if (results?.anchors) {
+      for (const k in results.anchors) {
+        const v = results.anchors[k];
+        if (v === "fail" || v === "warn") return {status:"warn", text:"⚠ Anchor pending/warn"};
+      }
+    }
+    return {status:"ok", text:"✓ Verified"};
+  }
+
+  // ---------- main ----------
+  (async function main(){
+    try {
+      const rid = CONFIG.RECEIPT_ID || deriveReceiptId();
+      const bundle = await fetchReceipt(rid);
+      renderReceipt(bundle);
+
+      const r = bundle.receipt || bundle;
+      const seal = r.seal || {};
+      let vr;
+      try {
+        vr = awa
