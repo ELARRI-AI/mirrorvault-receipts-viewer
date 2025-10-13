@@ -177,19 +177,17 @@
     }
   }
 
+  // ---------- verify ----------
   async function verifySeal(content_digest, seal) {
-async function verifySeal(content_digest, seal) {
-  // DEMO shortcut: force green for rcpt_demo*
-  if (/^rcpt_demo/i.test((window.currentReceiptId || deriveReceiptId() || ""))) {
-    return {
-      ok: true,
-      results: { sig:"pass", issuer:"pass", expiry:"pass", transparency:"pass", anchors:{} },
-      warnings: [],
-      verifier_version: "demo"
-    };
-  }
-
-  const url = `${CONFIG.VERIFY_BASE}/v1/verifySeal`;
+    // DEMO shortcut: force green for rcpt_demo*
+    if (/^rcpt_demo/i.test((window.currentReceiptId || deriveReceiptId() || ""))) {
+      return {
+        ok: true,
+        results: { sig:"pass", issuer:"pass", expiry:"pass", transparency:"pass", anchors:{} },
+        warnings: [],
+        verifier_version: "demo"
+      };
+    }
     const url = `${CONFIG.VERIFY_BASE}/v1/verifySeal`;
     const body = {
       content_digest,
@@ -293,58 +291,60 @@ async function verifySeal(content_digest, seal) {
   }
 
   // ---------- main ----------
-// ---------- main ----------
-(async function main(){
-  try {
-    const rid = CONFIG.RECEIPT_ID || deriveReceiptId();
-    const bundle = await fetchReceipt(rid);
-
-    // Render first
-    renderReceipt(bundle);
-
-    // Fade-in all main sections (after DOM is filled)
-    document.querySelectorAll('.wrap, .grid, .card').forEach(el => {
-      el.classList.add('fadein');
-      setTimeout(() => el.classList.add('visible'), 120);
-    });
-
-    // Copy verification link button
-    const copyBtn = document.getElementById('copyLink');
-    if (copyBtn) {
-      copyBtn.addEventListener('click', async () => {
-        try {
-          await navigator.clipboard.writeText(window.location.href);
-          const prev = copyBtn.textContent;
-          copyBtn.textContent = 'Link Copied ✓';
-          setTimeout(() => (copyBtn.textContent = prev), 1400);
-        } catch {
-          alert('Could not copy link');
-        }
-      });
-    }
-
-    // Then verify (this will return "ok" in demo due to the short-circuit)
-    const r = bundle.receipt || bundle;
-    const seal = r.seal || {};
-    let vr;
+  (async function main(){
     try {
-      vr = await verifySeal(r.content_digest, seal);
-    } catch (e) {
-      vr = {
-        ok: false,
-        results: { sig: "warn", issuer: "warn", expiry: "warn", transparency: "warn", anchors: {} },
-        warnings: ["verifier unreachable"],
-        verifier_version: "demo-fallback"
-      };
+      const rid = CONFIG.RECEIPT_ID || deriveReceiptId();
+      const bundle = await fetchReceipt(rid);
+
+      // Render first
+      renderReceipt(bundle);
+
+      // Fade-in
+      document.querySelectorAll('.wrap, .grid, .card').forEach(el => {
+        el.classList.add('fadein');
+        setTimeout(() => el.classList.add('visible'), 120);
+      });
+
+      // Copy verification link
+      const copyBtn = document.getElementById('copyLink');
+      if (copyBtn) {
+        copyBtn.addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(window.location.href);
+            const prev = copyBtn.textContent;
+            copyBtn.textContent = 'Link Copied ✓';
+            setTimeout(() => (copyBtn.textContent = prev), 1400);
+          } catch {
+            alert('Could not copy link');
+          }
+        });
+      }
+
+      // Verify (demo returns ok due to short-circuit)
+      const r = bundle.receipt || bundle;
+      const seal = r.seal || {};
+      let vr;
+      try {
+        vr = await verifySeal(r.content_digest, seal);
+      } catch (e) {
+        vr = {
+          ok: false,
+          results: { sig: "warn", issuer: "warn", expiry: "warn", transparency: "warn", anchors: {} },
+          warnings: ["verifier unreachable"],
+          verifier_version: "demo-fallback"
+        };
+      }
+
+      const verdict = classifyResult(vr);
+      setBadge(verdict.status, verdict.text);
+
+    } catch (err) {
+      console.error(err);
+      const errEl = document.getElementById("error");
+      if (errEl) { errEl.style.display = "block"; errEl.textContent = "Error: " + err.message; }
+      setBadge("fail", "✗ Could not verify");
     }
-
-    const verdict = classifyResult(vr);
-    setBadge(verdict.status, verdict.text);
-
-  } catch (err) {
-    console.error(err);
-    const errEl = document.getElementById("error");
-    if (errEl) { errEl.style.display = "block"; errEl.textContent = "Error: " + err.message; }
-    setBadge("fail", "✗ Could not verify");
-  }
-})();
+  })();
+  </script>
+</body>
+</html>
