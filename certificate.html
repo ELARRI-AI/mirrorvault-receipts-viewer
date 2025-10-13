@@ -41,16 +41,28 @@
   content:"";
   position:absolute; inset:0;
   background-repeat:no-repeat;
-  background-position:center 40%;
-  background-size:3.5in 3.5in;
-  opacity:0.14; pointer-events:none;
+  background-position:center 38%;
+  background-size:3.6in 3.6in;
+  pointer-events:none;
 
-  /* embedded SVG sigil (gold ring + inner triangle) */
-  background-image:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48Y2lyY2xlIGN4PSIyNTYiIGN5PSIyNTYiIHI9IjIwMCIgc3Ryb2tlPSIjZDZiMTY4IiBzdHJva2Utd2lkdGg9IjgiIGZpbGw9Im5vbmUiIHN0cm9rZS1vcGFjaXR5PSIuNjUiLz48cGF0aCBkPSJNMjU2IDEwMCAxOTAgMzUwIDMyMiAzNTAiIHN0cm9rZT0iI2Q2YjE2OCIgc3Ryb2tlLXdpZHRoPSI4IiBmaWxsPSJub25lIiBzdHJva2Utb3BhY2l0eT0iLjY1Ii8+PC9zdmc+");
+  /* stronger gold + branded sigil mark */
+  opacity:0.28;
+  background-image:url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'>\
+<defs><radialGradient id='g' cx='50%' cy='50%' r='50%'>\
+<stop offset='0%' stop-color='%23d6b168' stop-opacity='0.7'/>\
+<stop offset='100%' stop-color='%23d6b168' stop-opacity='0'/></radialGradient></defs>\
+<circle cx='256' cy='256' r='250' fill='url(%23g)'/>\
+<circle cx='256' cy='256' r='200' fill='none' stroke='%23d6b168' stroke-width='8' stroke-opacity='.6'/>\
+<path d='M256 100 L190 350 L322 350 Z' fill='none' stroke='%23d6b168' stroke-width='10' stroke-opacity='.7'/>\
+<text x='50%' y='280' text-anchor='middle' font-family='Georgia,serif' font-size='40' fill='%23d6b168' fill-opacity='.55'>MIRRORVAULT</text>\
+</svg>");
 }
-    @media print and (prefers-color-scheme: dark) {
-  .cert::before { opacity:0.22; }
-}
+
+/* optional: richer onscreen, softer in print */
+@media screen { .cert::before { opacity:0.32; } }
+@media print  { .cert::before { opacity:0.22; } }
+
 
       /* Inline SVG data-URI (concentric rings + inner triangle) */
       background-image: url("data:image/svg+xml;utf8,\
