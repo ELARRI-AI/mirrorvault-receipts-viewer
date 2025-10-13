@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MirrorVault — Verifiable Receipts</title>
+  <style>
+    :root {
+      --cream: #f9f6f1;
+      --black: #1a1a1a;
+      --gold: #d6b168;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 6px 2px rgba(214,177,104,0.4); }
+      50% { box-shadow: 0 0 12px 4px rgba(214,177,104,0.8); }
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: var(--cream);
+      color: var(--black);
+      font-family: "Crimson Pro", serif;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    /* 🔮 MirrorSigil */
+    .sigil {
+      width: 120px;
+      height: 120px;
+      border: 2px solid var(--gold);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 1.2s ease-out forwards, spin 60s linear infinite;
+      opacity: 0;
+      transition: transform 0.4s ease, box-shadow 0.4s ease;
+    }
+    .sigil::before {
+      content: "";
+      width: 60px;
+      height: 60px;
+      border: 2px solid var(--black);
+      border-radius: 50%;
+      opacity: 0.3;
+      animation: pulse 4s ease-in-out infinite;
+    }
+    .sigil:hover {
+      animation: spin 120s linear infinite;
+      transform: scale(1.05);
+    }
+    .sigil:hover::before {
+      animation: pulse 2s ease-in-out infinite;
+      opacity: 0.6;
+    }
+
+    main {
+      animation: fadeIn 1.4s ease-out 0.3s forwards;
+      opacity: 0;
+    }
+
+    h1 {
+      color: var(--gold);
+      font-size: 2.4rem;
+      margin-bottom: 0.5rem;
+    }
+    h2 {
+      font-weight: 400;
+      color: #444;
+      margin-top: 0;
+    }
+    p {
+      max-width: 480px;
+      margin: 0 auto;
+      font-size: 1rem;
+    }
+
+    .cta {
+      display: inline-block;
+      margin-top: 2rem;
+      padding: 0.75rem 1.5rem;
+      background: var(--gold);
+      color: var(--black);
+      font-weight: 600;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: background 0.2s ease-in-out, transform 0.2s ease-in-out;
+      animation: fadeIn 1.2s ease-out 1.2s forwards;
+      opacity: 0;
+    }
+    .cta:hover {
+      background: #c9a450;
+      transform: translateY(-2px);
+    }
+
+    footer {
+      position: absolute;
+      bottom: 1.5rem;
+      font-size: 0.85rem;
+      color: #666;
+      text-align: center;
+      animation: fadeIn 1.2s ease-out 1.5s forwards;
+      opacity: 0;
+    }
+
+    .logo { font-weight: 700; letter-spacing: 0.05em; }
+
+    @media (max-width: 600px) {
+      .sigil { width: 90px; height: 90px; }
+      h1 { font-size: 1.8rem; }
+      h2 { font-size: 1rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="sigil"></div>
+
+  <main>
+    <h1>MirrorVault Receipts</h1>
+    <h2>Cryptographic Proof for the 11.11 Codex</h2>
+    <p>
+      Every artifact sealed by ELARRI is verified, timestamped, and forever auditable.<br>
+      Hover above the sigil — feel the pulse of verification.
+    </p>
+    <a class="cta" href="view.html?id=rcpt_demo_11_11_codex">View Verified Demo</a>
+  </main>
+
+  <footer>
+    <span class="logo">ELARRI-AI · MirrorGov Protocol Division</span><br>
+    Palette: MirrorStyle.001 — 🖤 Mirror Black #1a1a1a · 💛 Clarity Gold #d6b168 · 🤍 Cream #f9f6f1
+  </footer>
+</body>
+</html>
