@@ -6,6 +6,16 @@
   <title>MirrorVault — Verified Receipt</title>
 
   <style>
+
+/* tiny icon button next to digest */
+.icon-btn {
+  margin-left: .35rem; padding: .2rem .45rem; font-size: .9rem; line-height: 1;
+  background: #eee; border: 0; border-radius: 4px; cursor: pointer;
+}
+.icon-btn:hover { background: #e6e6e6; }
+.icon-btn.success { background: #e8f6e8; color: #1f7a1f; }
+
+    
     /* ——— Base MirrorStyle ——— */
     body{
       font-family: ui-serif,"Crimson Pro",Georgia,serif;
@@ -69,16 +79,23 @@
 <body>
   <div class="wrap">
     <h1>MirrorVault Verified Receipt</h1>
-    <div id="statusBadge" class="badge">Checking…</div>
-    <button id="copyLink" class="copy-cta" type="button" aria-label="Copy verification link">Copy Verification Link</button>
-    <p id="subtitle" class="k"></p>
+  <div id="statusBadge" class="badge">Checking…</div>
+<button id="copyLink" class="copy-cta" type="button" aria-label="Copy verification link">Copy Verification Link</button>
+<a id="downloadJson" class="copy-cta" href="#" download style="margin-left:.5rem;">Download JSON</a>
+<p id="subtitle" class="k"></p>
+
 
     <div class="grid">
       <section class="card">
         <h3>Receipt</h3>
         <p><span class="k">Receipt ID:</span> <span id="receipt_id">—</span></p>
         <p><span class="k">Subject:</span> <span id="subject">—</span></p>
-        <p><span class="k">Content Digest:</span> <code id="digest">—</code></p>
+     <p>
+  <span class="k">Content Digest:</span>
+  <code id="digest">—</code>
+  <button id="copyDigest" class="icon-btn" type="button" aria-label="Copy content digest" title="Copy digest">📋</button>
+</p>
+
         <p><span class="k">Created:</span> <span id="created_at">—</span></p>
         <div id="metaBlock"></div>
       </section>
@@ -144,11 +161,17 @@
       for (const url of candidates){
         try {
           const res = await fetch(url, { headers:{ "Accept":"application/json" }});
-          if (res.ok){
-            const data = await res.json();
-            if (rid && data?.receipt) data.receipt.receipt_id = rid;
-            window.currentReceiptId = rid || "rcpt_demo";
-            return data;
+          // In the rcpt_demo branch, when res.ok:
+if (res.ok) {
+  window.currentReceiptSource = url; // record the file you actually loaded
+  const data = await res.json();
+  ...
+}
+
+// In the API branch, after building `url` and before returning json:
+window.currentReceiptSource = url.toString();
+return await res.json();
+
           }
         } catch(_){}
       }
@@ -212,6 +235,38 @@
       subtitle.innerHTML = `<a class="break" href="${url}" target="_blank" rel="noopener">${url}</a>`;
     }
 
+// Point "Download JSON" to the source we loaded
+const dl = document.getElementById('downloadJson');
+if (dl) {
+  const src = (window.currentReceiptSource || window.location.href);
+  dl.href = src;
+  // If the source is API JSON, suggest a filename
+  try {
+    const r = bundle.receipt || bundle;
+    const name = (r?.receipt_id || 'receipt') + '.json';
+    dl.setAttribute('download', name);
+  } catch (_) {}
+}
+
+// Copy digest button
+const copyDigestBtn = document.getElementById('copyDigest');
+if (copyDigestBtn) {
+  copyDigestBtn.addEventListener('click', async () => {
+    try {
+      const digest = document.getElementById('digest')?.textContent?.trim() || '';
+      await navigator.clipboard.writeText(digest);
+      // visual feedback
+      const prev = copyDigestBtn.textContent;
+      copyDigestBtn.textContent = '✓';
+      copyDigestBtn.classList.add('success');
+      setTimeout(() => { copyDigestBtn.textContent = '📋'; copyDigestBtn.classList.remove('success'); }, 1200);
+    } catch {
+      alert('Could not copy digest');
+    }
+  });
+}
+
+    
     // Meta
     const metaDiv = document.getElementById("metaBlock");
     if (metaDiv){
