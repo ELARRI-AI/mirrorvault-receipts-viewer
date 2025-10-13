@@ -15,6 +15,14 @@
 .icon-btn:hover { background: #e6e6e6; }
 .icon-btn.success { background: #e8f6e8; color: #1f7a1f; }
 
+    .icon-btn {
+  margin-left: .35rem; padding: .2rem .45rem; font-size: .9rem; line-height: 1;
+  background: #eee; border: 0; border-radius: 4px; cursor: pointer;
+}
+.icon-btn:hover { background: #e6e6e6; }
+.icon-btn.success { background: #e8f6e8; color: #1f7a1f; }
+
+
     
     /* ——— Base MirrorStyle ——— */
     body{
@@ -73,6 +81,48 @@
       .wrap{ padding-left:1rem; padding-right:1rem; }
       .grid{ grid-template-columns:1fr; }
       .k{ min-width:7.5rem; }
+
+// Generic copy helper
+async function handleCopy(btn, value) {
+  try {
+    await navigator.clipboard.writeText(value);
+    const prev = btn.textContent;
+    btn.textContent = '✓';
+    btn.classList.add('success');
+    setTimeout(() => { btn.textContent = '📋'; btn.classList.remove('success'); }, 1200);
+  } catch {
+    alert('Could not copy');
+  }
+}
+
+// Digest copy
+const copyDigestBtn = document.getElementById('copyDigest');
+if (copyDigestBtn) {
+  copyDigestBtn.addEventListener('click', () => {
+    const digest = document.getElementById('digest')?.textContent?.trim() || '';
+    handleCopy(copyDigestBtn, digest);
+  });
+}
+
+// Issuer copy
+const copyIssuerBtn = document.getElementById('copyIssuer');
+if (copyIssuerBtn) {
+  copyIssuerBtn.addEventListener('click', () => {
+    const issuer = document.getElementById('issuer')?.textContent?.trim() || '';
+    handleCopy(copyIssuerBtn, issuer);
+  });
+}
+
+// Timechain TX copy
+const copyTimechainBtn = document.getElementById('copyTimechain');
+if (copyTimechainBtn) {
+  copyTimechainBtn.addEventListener('click', () => {
+    const tx = document.querySelector('#anchors code')?.textContent?.trim() || '';
+    handleCopy(copyTimechainBtn, tx);
+  });
+}
+
+      
     }
   </style>
 </head>
@@ -90,11 +140,12 @@
         <h3>Receipt</h3>
         <p><span class="k">Receipt ID:</span> <span id="receipt_id">—</span></p>
         <p><span class="k">Subject:</span> <span id="subject">—</span></p>
-     <p>
+   <p>
   <span class="k">Content Digest:</span>
   <code id="digest">—</code>
-  <button id="copyDigest" class="icon-btn" type="button" aria-label="Copy content digest" title="Copy digest">📋</button>
+  <button id="copyDigest" class="icon-btn" type="button" title="Copy digest">📋</button>
 </p>
+
 
         <p><span class="k">Created:</span> <span id="created_at">—</span></p>
         <div id="metaBlock"></div>
@@ -103,7 +154,12 @@
       <section class="card">
         <h3>Seal</h3>
         <p><span class="k">Algorithm:</span> <span id="alg">—</span></p>
-        <p><span class="k">Issuer:</span> <span id="issuer">—</span></p>
+<p>
+  <span class="k">Issuer:</span>
+  <span id="issuer">—</span>
+  <button id="copyIssuer" class="icon-btn" type="button" title="Copy issuer DID">📋</button>
+</p>
+
         <p><span class="k">Key ID:</span> <span id="key_id">—</span></p>
         <p><span class="k">Issued At:</span> <span id="issued_at">—</span></p>
         <details><summary>Signature</summary><code id="sig">—</code></details>
@@ -256,6 +312,7 @@ function renderReceipt(bundle){
     const a = (s.anchors || {});
     const rows = [
       ["timechain_tx", a.timechain_tx],
+      <button id="copyTimechain" class="icon-btn" type="button" title="Copy timechain tx">📋</button>
       ["transparency_log_id", a.transparency_log_id],
       ["notary_ref", a.notary_ref],
       ["witness_hash", a.witness_hash]
