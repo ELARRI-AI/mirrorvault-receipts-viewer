@@ -5,7 +5,7 @@
   <title>MirrorVault — Verification Certificate</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Print-friendly, PDF/A-friendly styling (no external fonts) -->
+  <!-- Print-friendly (system fonts), CSP-safe (no external assets), data-URI watermark -->
   <style>
     :root { --cream:#f9f6f1; --black:#1a1a1a; --gold:#d6b168; }
 
@@ -30,129 +30,25 @@
       max-width: 8.5in; min-height: 11in; margin: .6in auto; padding: .8in;
       background: #fff; border:1px solid var(--gold); border-radius:12px;
       box-sizing: border-box; position:relative;
-      background-image: radial-gradient(circle at 50% 38%, rgba(214,177,104,.08), transparent 60%);
-    }
-    .header { text-align:center; margin-bottom:.4in; }
-    .title { font-size:28pt; margin:0 0 .15in; color: var(--gold); }
-    .subtitle { font-size:12pt; color:#444; margin:0; }
-
-    .row { display:flex; margin:.18in 0; font-size:12pt; }
-    .label { width: 1.9in; font-weight:700; }
-    .value { flex:1; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; word-break:break-word; overflow-wrap:anywhere; }
-
-    .seal { text-align:center; margin-top:.45in; font-weight:800; font-size:13pt; }
-    .seal .ok { color:#2b6b2b; }
-
-    .footer {
-      margin-top:.35in; font-size:10pt; color:#555; text-align:center;
+      /* subtle paper glow */
+      background-image: radial-gradient(circle at 50% 38%, rgba(214,177,104,.06), transparent 60%);
+      overflow: hidden;
     }
 
-    /* Print: hide toolbar; preserve page */
-    @media print {
-      .toolbar { display:none !important; }
-      .cert { margin: 0 auto; border: 1pt solid var(--gold); }
-    }
-  </style>
-</head>
-<body>
-  <!-- On-screen controls (not printed) -->
-  <div class="toolbar" role="region" aria-label="Certificate controls">
-    <button id="openViewer" class="btn" type="button">Open in Viewer</button>
-    <button id="downloadPdf" class="btn" type="button">Download PDF</button>
-  </div>
-
-  <!-- Certificate canvas -->
-  <main class="cert" role="document" aria-label="MirrorVault Verification Certificate">
-    <header class="header">
-      <h1 class="title">MirrorVault Verification Certificate</h1>
-      <p class="subtitle">Cryptographic proof of authenticity and provenance</p>
-    </header>
-
-    <section aria-labelledby="r-info">
-      <div class="row"><div class="label">Receipt ID</div><div id="c_receipt" class="value">—</div></div>
-      <div class="row"><div class="label">Subject</div><div id="c_subject" class="value">—</div></div>
-      <div class="row"><div class="label">Digest</div><div id="c_digest" class="value">—</div></div>
-      <div class="row"><div class="label">Issuer</div><div id="c_issuer" class="value">—</div></div>
-      <div class="row"><div class="label">Issued At</div><div id="c_issued" class="value">—</div></div>
-      <div class="row"><div class="label">Anchors</div><div id="c_anchors" class="value">—</div></div>
-      <div class="row"><div class="label">Verification URL</div><div id="c_url" class="value">—</div></div>
-    </section>
-
-    <div class="seal"><span class="ok">✓ Verified</span> — MirrorVault Codex</div>
-
-    <footer class="footer">
-      Rendered for long-term readability. For machine verification, open the Verification URL.
-    </footer>
-  </main>
-
-  <script>
-    // ------- helpers -------
-    function qp(name){ return new URLSearchParams(location.search).get(name); }
-    function safe(x){ return (x===undefined || x===null || x==="") ? "—" : String(x); }
-
-    async function fetchReceipt() {
-      const src = qp('src');
-      const id = qp('id');
-      // 1) explicit same-origin src
-      if (src && src.startsWith('/')) {
-        const res = await fetch(src, { headers: { "Accept":"application/json" }});
-        if (!res.ok) throw new Error('Could not fetch src');
-        return res.json();
-      }
-      // 2) demo ids → local files
-      if (!id || /^rcpt_demo/i.test(id)) {
-        const candidates = [
-          `/receipts/${encodeURIComponent(id || "rcpt_demo")}.json`,
-          `/receipts/demo.json`
-        ];
-        for (const url of candidates) {
-          try {
-            const res = await fetch(url, { headers: { "Accept":"application/json" }});
-            if (res.ok) return res.json();
-          } catch (_) {}
-        }
-        throw new Error('Demo receipt not found');
-      }
-      // 3) live id → API (CSP allows api.mirrorvault.ai)
-      const url = `https://api.mirrorvault.ai/v1/getReceipt/${encodeURIComponent(id)}?format=json`;
-      const res = await fetch(url, { headers: { "Accept":"application/json" }});
-      if (!res.ok) throw new Error('API fetch failed');
-      return res.json();
-    }
-
-    function fillCertificate(bundle) {
-      const r = bundle.receipt || bundle;
-
-      document.getElementById('c_receipt').textContent = safe(r.receipt_id);
-      document.getElementById('c_subject').textContent = safe(r.subject);
-      document.getElementById('c_digest').textContent = safe(r.content_digest);
-      document.getElementById('c_issuer').textContent = safe(r.seal?.issuer);
-      document.getElementById('c_issued').textContent = safe(r.seal?.issued_at);
-
-      const a = r.seal?.anchors || {};
-      const anchors = ['timechain_tx','transparency_log_id','notary_ref','witness_hash']
-        .filter(k => a[k]).map(k => `${k}: ${a[k]}`).join('  •  ') || '—';
-      document.getElementById('c_anchors').textContent = anchors;
-
-      const url = r.verification_url || (location.origin + '/view.html?id=' + safe(r.receipt_id));
-      document.getElementById('c_url').textContent = url;
-
-      // wire toolbar actions
-      const openViewer = document.getElementById('openViewer');
-      if (openViewer) openViewer.onclick = () => window.location = url;
-
-      const download = document.getElementById('downloadPdf');
-      if (download) download.onclick = () => window.print();
-    }
-
-    (async function main(){
-      try {
-        const bundle = await fetchReceipt();
-        fillCertificate(bundle);
-      } catch (e) {
-        alert('Could not load certificate data: ' + e.message);
-      }
-    })();
-  </script>
-</body>
-</html>
+    /* Gold watermark (inline SVG) */
+    .cert::before {
+      content:"";
+      position:absolute; inset:0;
+      background-repeat:no-repeat;
+      background-position:center 38%;
+      background-size: 3.2in 3.2in;
+      opacity:.18; pointer-events:none;
+      /* Inline SVG data-URI (concentric rings + inner triangle) */
+      background-image: url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'>\
+<defs><radialGradient id='g' cx='50%' cy='50%' r='50%'>\
+<stop offset='0%' stop-color='%23d6b168' stop-opacity='0.65'/>\
+<stop offset='100%' stop-color='%23d6b168' stop-opacity='0'/></radialGradient></defs>\
+<circle cx='256' cy='256' r='250' fill='url(%23g)'/>\
+<circle cx='256' cy='256' r='200' fill='none' stroke='%23d6b168' stroke-width='6' stroke-opacity='.55'/>\
+<circle cx='256' cy='256' r='145
