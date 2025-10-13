@@ -36,13 +36,22 @@
     }
 
     /* Gold watermark (inline SVG) */
-    .cert::before {
-      content:"";
-      position:absolute; inset:0;
-      background-repeat:no-repeat;
-      background-position:center 38%;
-      background-size: 3.2in 3.2in;
-      opacity:.18; pointer-events:none;
+ /* Soft gold sigil watermark (CSP-safe, inline SVG) */
+.cert::before {
+  content:"";
+  position:absolute; inset:0;
+  background-repeat:no-repeat;
+  background-position:center 40%;
+  background-size:3.5in 3.5in;
+  opacity:0.14; pointer-events:none;
+
+  /* embedded SVG sigil (gold ring + inner triangle) */
+  background-image:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48Y2lyY2xlIGN4PSIyNTYiIGN5PSIyNTYiIHI9IjIwMCIgc3Ryb2tlPSIjZDZiMTY4IiBzdHJva2Utd2lkdGg9IjgiIGZpbGw9Im5vbmUiIHN0cm9rZS1vcGFjaXR5PSIuNjUiLz48cGF0aCBkPSJNMjU2IDEwMCAxOTAgMzUwIDMyMiAzNTAiIHN0cm9rZT0iI2Q2YjE2OCIgc3Ryb2tlLXdpZHRoPSI4IiBmaWxsPSJub25lIiBzdHJva2Utb3BhY2l0eT0iLjY1Ii8+PC9zdmc+");
+}
+    @media print and (prefers-color-scheme: dark) {
+  .cert::before { opacity:0.22; }
+}
+
       /* Inline SVG data-URI (concentric rings + inner triangle) */
       background-image: url("data:image/svg+xml;utf8,\
 <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'>\
