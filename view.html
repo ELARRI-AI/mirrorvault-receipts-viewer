@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MirrorVault — Verified Receipt</title>
+  <style>
+    body{font-family:ui-serif,"Crimson Pro",Georgia,serif;background:#f9f6f1;color:#1a1a1a;margin:0}
+    .wrap{max-width:760px;margin:2rem auto;padding:1.5rem;background:#fff;border:1px solid #d6b168;border-radius:12px}
+    h1{color:#d6b168;margin:0 0 .5rem}
+    .badge{display:inline-block;margin:.5rem 0;padding:.2rem .6rem;border-radius:6px;font-weight:700;background:#e8f6e8;color:#1f7a1f;border:1px solid #1f7a1f}
+    .badge.warn{background:#fff7e6;color:#9b6b00;border-color:#9b6b00}
+    .badge.fail{background:#fdeaea;color:#9b1c1c;border-color:#9b1c1c}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+    .card{border:1px solid #eee;border-left:4px solid #d6b168;padding:1rem;border-radius:8px;background:#fff}
+    .k{color:#666}
+    code{background:#faf8f3;padding:.1rem .3rem;border-radius:4px}
+    #error{color:#9b1c1c;font-weight:600;display:none;margin-top:.5rem}
+    @media(max-width:720px){.grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>MirrorVault Verified Receipt</h1>
+    <div id="statusBadge" class="badge">Checking…</div>
+    <p id="subtitle" class="k"></p>
+
+    <div class="grid">
+      <section class="card">
+        <h3>Receipt</h3>
+        <p><span class="k">Receipt ID:</span> <span id="receipt_id">—</span></p>
+        <p><span class="k">Subject:</span> <span id="subject">—</span></p>
+        <p><span class="k">Content Digest:</span> <code id="digest">—</code></p>
+        <p><span class="k">Created:</span> <span id="created_at">—</span></p>
+        <div id="metaBlock"></div>
+      </section>
+
+      <section class="card">
+        <h3>Seal</h3>
+        <p><span class="k">Algorithm:</span> <span id="alg">—</span></p>
+        <p><span class="k">Issuer:</span> <span id="issuer">—</span></p>
+        <p><span class="k">Key ID:</span> <span id="key_id">—</span></p>
+        <p><span class="k">Issued At:</span> <span id="issued_at">—</span></p>
+        <details><summary>Signature</summary><code id="sig">—</code></details>
+      </section>
+
+      <section class="card">
+        <h3>Anchors</h3>
+        <ul id="anchors"><li>No anchors attached.</li></ul>
+      </section>
+
+      <section class="card">
+        <h3>Attestations</h3>
+        <ul id="attestations"><li>None.</li></ul>
+      </section>
+    </div>
+
+    <div id="error" role="alert"></div>
+    <div class="k" style="text-align:center;margin-top:1rem">Seal ID <span id="sealId">—</span></div>
+  </div>
+
+  <!-- Use the drop-in script you pasted earlier -->
+  <script>
+  /* paste your full "MirrorVault Viewer — Full Drop-in Script (fixed)" here */
+  </script>
+</body>
+</html>
