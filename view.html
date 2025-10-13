@@ -17,6 +17,29 @@
     code{background:#faf8f3;padding:.1rem .3rem;border-radius:4px}
     #error{color:#9b1c1c;font-weight:600;display:none;margin-top:.5rem}
     @media(max-width:720px){.grid{grid-template-columns:1fr}}
+
+@keyframes floatY {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+  100% { transform: translateY(0); }
+}
+
+.sigil {
+  animation:
+    fadeIn 1.2s ease-out forwards,
+    spin 60s linear infinite,
+    floatY 6s ease-in-out 0.6s infinite;
+}
+
+    .cta {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.cta:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.15);
+}
+
+    
   </style>
 </head>
 <body>
@@ -268,5 +291,31 @@ function classifyResult(vr) {
 </script>
 
   </script>
+      <script>
+  (function enableKeyboardShortcut(){
+    const cta = document.querySelector('.cta');
+    if (!cta) return;
+
+    // Make focusable for tab navigation
+    cta.setAttribute('role', 'button');
+    cta.setAttribute('tabindex', '0');
+    cta.setAttribute('aria-label', 'View Verified Demo');
+
+    const trigger = () => {
+      cta.classList.add('seal-reveal');
+      // small delay so the flash shows
+      setTimeout(() => { window.location = cta.href; }, 120);
+    };
+
+    // Trigger on Enter or Space
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        trigger();
+      }
+    });
+  })();
+</script>
+
 </body>
 </html>
