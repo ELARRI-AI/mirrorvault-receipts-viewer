@@ -1,5 +1,5 @@
 <script>
-// ===== MirrorVault Viewer — Clean Drop-in Script (JS only) =====
+// ===== MirrorVault Viewer — Full Drop-in Script (fixed) =====
 
 // Launch config (demo points to same host; switch VERIFY_BASE later)
 const CONFIG = {
@@ -61,7 +61,6 @@ async function fetchReceipt(id) {
     window.currentReceiptId = rid;
     return await res.json();
   } catch (e) {
-    // graceful fallback
     const res = await fetch("/receipts/demo.json", { headers: { "Accept":"application/json" }});
     if (!res.ok) throw e;
     const data = await res.json();
@@ -71,7 +70,7 @@ async function fetchReceipt(id) {
 }
 
 async function verifySeal(content_digest, seal) {
-  // Short-circuit demo receipts (uncomment to force green badge)
+  // DEMO shortcut (optional): force green badge for local demo
   /*
   if (/^rcpt_demo/i.test((window.currentReceiptId || deriveReceiptId() || ""))) {
     return { ok: true, results: { sig:"pass", issuer:"pass", expiry:"pass", transparency:"pass", anchors:{} }, warnings: [], verifier_version: "demo" };
@@ -84,4 +83,124 @@ async function verifySeal(content_digest, seal) {
     checks: ["sig","issuer","expiry","transparency","anchors"]
   };
   const res = await fetch(url, { method:"POST", headers: { "Content-Type":"application/json" }, body: JSON.stringify(body) });
-  if
+  if (!res.ok) throw new Error(`verifySeal failed: ${res.status}`);
+  return res.json();
+}
+
+// ---------- renderers ----------
+function renderReceipt(bundle) {
+  const r = bundle.receipt || bundle;
+
+  [["receipt_id","receipt_id"],["subject","subject"],["created_at","created_at"]].forEach(([id,key]) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = safeText(r[key]);
+  });
+  const digestEl = document.getElementById("digest"); if (digestEl) digestEl.textContent = safeText(r.content_digest);
+  const sealIdEl = document.getElementById("sealId"); if (sealIdEl) sealIdEl.textContent = safeText(r.receipt_id);
+
+  const s = r.seal || {};
+  [["alg","alg"],["issuer","issuer"],["key_id","key_id"],["issued_at","issued_at"]].forEach(([id,key]) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = safeText(s[key]);
+  });
+  const sigEl = document.getElementById("sig"); if (sigEl) sigEl.textContent = safeText(s.sig);
+
+  const subtitle = document.getElementById("subtitle");
+  if (subtitle && r.verification_url) subtitle.textContent = r.verification_url;
+
+  // Meta
+  const metaDiv = document.getElementById("metaBlock");
+  if (metaDiv) {
+    const { actor, jurisdiction, consent_tier, tags, actor_name, document_title, document_uri } = r.meta || {};
+    metaDiv.innerHTML = `
+      <p><span class="k">Actor:</span> ${safeText(actor)} ${actor_name ? `&mdash; ${safeText(actor_name)}` : ""}</p>
+      <p><span class="k">Jurisdiction:</span> ${safeText(jurisdiction)}</p>
+      <p><span class="k">Consent Tier:</span> ${safeText(consent_tier)}</p>
+      <p><span class="k">Title:</span> ${safeText(document_title || "—")}</p>
+      <p><span class="k">Source:</span> ${document_uri ? `<a href="${document_uri}" target="_blank" rel="noopener">${document_uri}</a>` : "—"}</p>
+      <p><span class="k">Tags:</span> ${Array.isArray(tags) ? tags.join(", ") : "—"}</p>
+    `;
+  }
+
+  // Anchors
+  const anchorsUL = document.getElementById("anchors");
+  if (anchorsUL) {
+    anchorsUL.innerHTML = "";
+    const a = (s.anchors || {});
+    const rows = [
+      ["timechain_tx", a.timechain_tx],
+      ["transparency_log_id", a.transparency_log_id],
+      ["notary_ref", a.notary_ref],
+      ["witness_hash", a.witness_hash]
+    ];
+    let any = false;
+    rows.forEach(([label, val]) => {
+      if (val) {
+        any = true;
+        const li = document.createElement("li");
+        li.innerHTML = `<span class="k">${label}:</span> <code>${val}</code>`;
+        anchorsUL.appendChild(li);
+      }
+    });
+    if (!any) anchorsUL.innerHTML = "<li>No anchors attached.</li>";
+  }
+
+  // Attestations
+  const att = document.getElementById("attestations");
+  const list = bundle.attestations || r.attestations || [];
+  if (att) {
+    att.innerHTML = "";
+    if (!list.length) {
+      att.innerHTML = "<li>None.</li>";
+    } else {
+      list.forEach(x => {
+        const li = document.createElement("li");
+        const extra = [x.jurisdiction, x.review_method].filter(Boolean).join(" · ");
+        li.innerHTML = `<strong>${safeText(x.type)}</strong> — ${safeText(x.status)} ${extra ? `(${extra})` : ""}`;
+        att.appendChild(li);
+      });
+    }
+  }
+}
+
+function classifyResult(vr) {
+  if (!vr || typeof vr !== "object") return {status:"warn", text:"⚠ Verification unknown"};
+  const { results } = vr;
+  for (const k of ["sig","issuer","expiry","transparency"]) {
+    if (results?.[k] === "fail") return {status:"fail", text:"✗ Verification failed"};
+  }
+  if (results?.anchors) {
+    for (const k in results.anchors) {
+      const v = results.anchors[k];
+      if (v === "fail" || v === "warn") return {status:"warn", text:"⚠ Anchor pending/warn"};
+    }
+  }
+  return {status:"ok", text:"✓ Verified"};
+}
+
+// ---------- main ----------
+(async function main(){
+  try {
+    const rid = CONFIG.RECEIPT_ID || deriveReceiptId();
+    const bundle = await fetchReceipt(rid);
+    renderReceipt(bundle);
+
+    const r = bundle.receipt || bundle;
+    const seal = r.seal || {};
+    let vr;
+    try {
+      vr = await verifySeal(r.content_digest, seal);
+    } catch (e) {
+      vr = { ok:false, results:{ sig:"warn", issuer:"warn", expiry:"warn", transparency:"warn", anchors:{} }, warnings:["verifier unreachable"], verifier_version:"demo-fallback" };
+    }
+    const verdict = classifyResult(vr);
+    setBadge(verdict.status, verdict.text);
+
+  } catch (err) {
+    console.error(err);
+    const errEl = document.getElementById("error");
+    if (errEl) { errEl.style.display = "block"; errEl.textContent = "Error: " + err.message; }
+    setBadge("fail", "✗ Could not verify");
+  }
+})();
+</script>
