@@ -39,14 +39,35 @@
   box-shadow: 0 6px 14px rgba(0,0,0,0.15);
 }
 
+    /* fade-in reveal */
+.fadein { opacity: 0; transition: opacity .6s ease-in; }
+.fadein.visible { opacity: 1; }
+
+/* verified badge pulse */
+@keyframes verifiedPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(31,122,31,.28); }
+  50%      { box-shadow: 0 0 12px 4px rgba(31,122,31,.55); }
+}
+.badge.ok { animation: verifiedPulse 3s ease-in-out infinite; }
+
+/* copy button (reuses MirrorStyle tones) */
+.copy-cta {
+  display:inline-block; margin-top: .75rem; padding: .45rem .8rem;
+  background: #d6b168; color: #1a1a1a; font-weight: 600;
+  border: 0; border-radius: 6px; cursor: pointer;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.copy-cta:hover { transform: translateY(-2px); box-shadow: 0 6px 14px rgba(0,0,0,.12); }
+
     
   </style>
 </head>
 <body>
   <div class="wrap">
-    <h1>MirrorVault Verified Receipt</h1>
-    <div id="statusBadge" class="badge">Checking…</div>
-    <p id="subtitle" class="k"></p>
+ <h1>MirrorVault Verified Receipt</h1>
+<div id="statusBadge" class="badge">Checking…</div>
+<button id="copyLink" class="copy-cta" type="button" aria-label="Copy verification link">Copy Verification Link</button>
+<p id="subtitle" class="k"></p>
 
     <div class="grid">
       <section class="card">
@@ -277,3 +298,29 @@
       let vr;
       try {
         vr = awa
+
+        // After: renderReceipt(bundle);
+renderReceipt(bundle);
+
+// Fade-in all main sections
+document.querySelectorAll('.wrap, .grid, .card').forEach(el => {
+  el.classList.add('fadein');
+  // small delay to ensure layout is ready
+  setTimeout(() => el.classList.add('visible'), 120);
+});
+
+// Copy verification link
+const copyBtn = document.getElementById('copyLink');
+if (copyBtn) {
+  copyBtn.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      const prev = copyBtn.textContent;
+      copyBtn.textContent = 'Link Copied ✓';
+      setTimeout(() => copyBtn.textContent = prev, 1400);
+    } catch {
+      alert('Could not copy link');
+    }
+  });
+}
+
