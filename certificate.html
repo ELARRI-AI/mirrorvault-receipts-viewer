@@ -5,7 +5,7 @@
   <title>MirrorVault — Verification Certificate</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Print-friendly (system fonts), CSP-safe (no external assets), data-URI watermark -->
+  <!-- Print-friendly (system fonts), CSP-safe (no external assets) -->
   <style>
     :root { --cream:#f9f6f1; --black:#1a1a1a; --gold:#d6b168; }
 
@@ -30,11 +30,11 @@
       max-width: 8.5in; min-height: 11in; margin: .6in auto; padding: .8in;
       background: #fff; border:1px solid var(--gold); border-radius:12px;
       box-sizing: border-box; position:relative; overflow:hidden;
-      /* subtle paper glow */
+      /* subtle paper glow behind watermark */
       background-image: radial-gradient(circle at 50% 38%, rgba(214,177,104,.06), transparent 60%);
     }
 
-    /* —— Press-visible MirrorVault watermark —— */
+    /* —— MirrorVault watermark (base64; cross-browser safe) —— */
     .cert::before {
       content: "";
       position: absolute; inset: 0;
@@ -42,20 +42,16 @@
       background-position: center 38%;
       background-size: 3.8in 3.8in;
       pointer-events: none;
+      z-index: 0;
       opacity: 0.45; /* visible on-screen */
 
-      /* Ring + triangle + wordmark (CSP-safe inline SVG) */
-      background-image: url("data:image/svg+xml;utf8,\
-<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'>\
-<defs><radialGradient id='g' cx='50%' cy='50%' r='50%'>\
-<stop offset='0%' stop-color='%23d6b168' stop-opacity='0.75'/>\
-<stop offset='100%' stop-color='%23d6b168' stop-opacity='0'/></radialGradient></defs>\
-<circle cx='256' cy='256' r='250' fill='url(%23g)'/>\
-<circle cx='256' cy='256' r='200' fill='none' stroke='%23d6b168' stroke-width='8' stroke-opacity='.65'/>\
-<path d='M256 100 L190 350 L322 350 Z' fill='none' stroke='%23d6b168' stroke-width='10' stroke-opacity='.7'/>\
-<text x='50%' y='285' text-anchor='middle' font-family='Georgia,serif' font-size='40' fill='%23d6b168' fill-opacity='.55'>MIRRORVAULT</text>\
-</svg>");
+      /* Gold ring + triangle + MIRRORVAULT wordmark */
+      background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCA1MTIgNTEyJz48ZGVmcz48cmFkaWFsR3JhZGllbnQgaWQ9J2cnIGN4PSc1MCUnIGN5PSc1MCUnIHI9JzUwJSc+PHN0b3Agb2Zmc2V0PScwJScgc3RvcC1jb2xvcj0nI2Q2YjE2OCcgc3RvcC1vcGFjaXR5PScwLjc1Jy8+PHN0b3Agb2Zmc2V0PScxMDAlJyBzdG9wLWNvbG9yPScjZDZiMTY4JyBzdG9wLW9wYWNpdHk9JzAnLz48L3JhZGlhbEdyYWRpZW50PjwvZGVmcz48Y2lyY2xlIGN4PScyNTYnIGN5PScyNTYnIHI9JzI1MCcgZmlsbD0ndXJsKCNnKScvPjxjaXJjbGUgY3g9JzI1NicgY3k9JzI1Nicgcj0nMjAwJyBmaWxsPSdub25lJyBzdHJva2U9JyNkNmIxNjgnIHN0cm9rZS13aWR0aD0nOCcgc3Ryb2tlLW9wYWNpdHk9Jy42NScvPjxwYXRoIGQ9J00yNTYgMTAwIEwxOTAgMzUwIEwzMjIgMzUwIFonIGZpbGw9J25vbmUnIHN0cm9rZT0nI2Q2YjE2OCcgc3Ryb2tlLXdpZHRoPScxMCcgc3Ryb2tlLW9wYWNpdHk9Jy43Jy8+PHRleHQgeD0nNTAlJyB5PScyODUnIHRleHQtYW5jaG9yPSdtaWRkbGUnIGZvbnQtZmFtaWx5PSdHZW9yZ2lhLHNlcmlmJyBmb250LXNpemU9JzQwJyBmaWxsPScjZDZiMTY4JyBmaWxsLW9wYWNpdHk9Jy41NSc+TUlSUk9SVkFVTFRPCjwvdGV4dD48L3N2Zz4=");
     }
+
+    /* content above watermark */
+    .cert > * { position: relative; z-index: 1; }
+
     /* Soften in print */
     @media print { .cert::before { opacity: 0.25; } }
 
@@ -114,7 +110,12 @@
       const q = new URLSearchParams(location.search);
       if (q.get('wm') === 'hi') {
         const st = document.createElement('style');
-        st.textContent = `.cert::before{opacity:.55 !important; background-size:4.5in 4.5in !important;}`;
+        st.textContent = `.cert::before{opacity:.58 !important; background-size:4.6in 4.6in !important;}`;
+        document.head.appendChild(st);
+      }
+      if (q.get('wm') === 'debug') {
+        const st = document.createElement('style');
+        st.textContent = `.cert::before{outline: 2px dashed rgba(214,177,104,.8);}`;
         document.head.appendChild(st);
       }
     })();
