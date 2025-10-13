@@ -9,7 +9,7 @@ const CONFIG = {
   INCLUDE: "chain,attestations"
 };
 
-// ---------- helpers ----------
+// ---------- helpers -----------
 function deriveReceiptId() {
   const qp = new URLSearchParams(location.search);
   if (qp.get("id")) return qp.get("id");
