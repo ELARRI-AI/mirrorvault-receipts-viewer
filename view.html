@@ -124,261 +124,254 @@
     <div class="k" style="text-align:center;margin-top:1rem">Seal ID <span id="sealId">—</span></div>
   </div>
 
-  <!-- Viewer logic -->
-  <script>
-  // ===== MirrorVault Viewer — Full Drop-in Script (consolidated) =====
-  const CONFIG = {
-    API_BASE: "https://verify.mirrorvault.ai",
-    VERIFY_BASE: "https://api.mirrorvault.ai",
-    RECEIPT_ID: null,
-    INCLUDE: "chain,attestations"
-  };
+<!-- Viewer logic -->
+<script>
+// ===== MirrorVault Viewer — Full Drop-in Script (final) =====
+const CONFIG = {
+  API_BASE: "https://verify.mirrorvault.ai",
+  VERIFY_BASE: "https://api.mirrorvault.ai",
+  RECEIPT_ID: null,
+  INCLUDE: "chain,attestations"
+};
 
-  // helpers
-  function deriveReceiptId(){
-    const qp = new URLSearchParams(location.search);
-    if (qp.get("id")) return qp.get("id");
-    const m = location.pathname.match(/(rcpt_[A-Za-z0-9_]+)/);
-    return m ? m[1] : null;
-  }
-  function safeText(x){ return (x===undefined || x===null || x==="") ? "—" : String(x); }
-  function setBadge(status, text){
-    const el = document.getElementById("statusBadge"); if(!el) return;
-    el.className = "badge";
-    if (status==="ok") el.classList.add("ok");
-    else if (status==="warn") el.classList.add("warn");
-    else if (status==="fail") el.classList.add("fail");
-    el.textContent = text;
-  }
-
-  // data fetchers
-  async function fetchReceipt(id){
-    const rid = id || deriveReceiptId();
-
-    // rcpt_demo* → local demo
-    if (!rid || /^rcpt_demo/i.test(rid)) {
-      const candidates = [`/receipts/${encodeURIComponent(rid || "rcpt_demo")}.json`, `/receipts/demo.json`];
-      for (const url of candidates){
-        try {
-          const res = await fetch(url, { headers:{ "Accept":"application/json" }});
-          // In the rcpt_demo branch, when res.ok:
-if (res.ok) {
-  window.currentReceiptSource = url; // record the file you actually loaded
-  const data = await res.json();
-  ...
+// ---------- helpers ----------
+function deriveReceiptId(){
+  const qp = new URLSearchParams(location.search);
+  if (qp.get("id")) return qp.get("id");
+  const m = location.pathname.match(/(rcpt_[A-Za-z0-9_]+)/);
+  return m ? m[1] : null;
+}
+function safeText(x){ return (x===undefined || x===null || x==="") ? "—" : String(x); }
+function setBadge(status, text){
+  const el = document.getElementById("statusBadge"); if(!el) return;
+  el.className = "badge";
+  if (status==="ok") el.classList.add("ok");
+  else if (status==="warn") el.classList.add("warn");
+  else if (status==="fail") el.classList.add("fail");
+  el.textContent = text;
 }
 
-// In the API branch, after building `url` and before returning json:
-window.currentReceiptSource = url.toString();
-return await res.json();
+// ---------- data fetchers ----------
+async function fetchReceipt(id){
+  const rid = id || deriveReceiptId();
 
-          }
-        } catch(_){}
-      }
-      throw new Error("Demo receipt JSON not found (checked /receipts/<id>.json and /receipts/demo.json).");
-    }
-
-    // else hit future API; fallback to demo
-    try {
-      const url = new URL(`${CONFIG.API_BASE}/v1/getReceipt/${encodeURIComponent(rid)}`);
-      if (CONFIG.INCLUDE) url.searchParams.set("include", CONFIG.INCLUDE);
-      url.searchParams.set("format", "json");
-      const res = await fetch(url.toString(), { headers:{ "Accept":"application/json" }});
-      if (!res.ok) throw new Error(`getReceipt failed: ${res.status}`);
-      window.currentReceiptId = rid;
-      return await res.json();
-    } catch (e){
-      const res = await fetch("/receipts/demo.json", { headers:{ "Accept":"application/json" }});
-      if (!res.ok) throw e;
-      const data = await res.json();
-      window.currentReceiptId = "rcpt_demo";
-      return data;
-    }
-  }
-
-  // verify — demo short-circuit returns GREEN so pulse shows
-  async function verifySeal(content_digest, seal){
-    if (/^rcpt_demo/i.test((window.currentReceiptId || deriveReceiptId() || ""))) {
-      return { ok:true, results:{ sig:"pass", issuer:"pass", expiry:"pass", transparency:"pass", anchors:{} }, warnings:[], verifier_version:"demo" };
-    }
-    const url = `${CONFIG.VERIFY_BASE}/v1/verifySeal`;
-    const body = {
-      content_digest,
-      seal: { alg: seal.alg, sig: seal.sig, issuer: seal.issuer, key_id: seal.key_id, issued_at: seal.issued_at },
-      checks: ["sig","issuer","expiry","transparency","anchors"]
-    };
-    const res = await fetch(url, { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify(body) });
-    if (!res.ok) throw new Error(`verifySeal failed: ${res.status}`);
-    return res.json();
-  }
-
-  // renderers
-  function renderReceipt(bundle){
-    const r = bundle.receipt || bundle;
-
-    [["receipt_id","receipt_id"],["subject","subject"],["created_at","created_at"]].forEach(([id,key])=>{
-      const el = document.getElementById(id); if (el) el.textContent = safeText(r[key]);
-    });
-    document.getElementById("digest")?.classList.add("break");
-    const digestEl = document.getElementById("digest"); if (digestEl) digestEl.textContent = safeText(r.content_digest);
-    const sealIdEl = document.getElementById("sealId"); if (sealIdEl) sealIdEl.textContent = safeText(r.receipt_id);
-
-    const s = r.seal || {};
-    [["alg","alg"],["issuer","issuer"],["key_id","key_id"],["issued_at","issued_at"]].forEach(([id,key])=>{
-      const el = document.getElementById(id); if (el) el.textContent = safeText(s[key]);
-    });
-    const sigEl = document.getElementById("sig"); if (sigEl) sigEl.textContent = safeText(s.sig);
-
-    const subtitle = document.getElementById("subtitle");
-    if (subtitle && r.verification_url){
-      const url = r.verification_url;
-      subtitle.innerHTML = `<a class="break" href="${url}" target="_blank" rel="noopener">${url}</a>`;
-    }
-
-// Point "Download JSON" to the source we loaded
-const dl = document.getElementById('downloadJson');
-if (dl) {
-  const src = (window.currentReceiptSource || window.location.href);
-  dl.href = src;
-  // If the source is API JSON, suggest a filename
-  try {
-    const r = bundle.receipt || bundle;
-    const name = (r?.receipt_id || 'receipt') + '.json';
-    dl.setAttribute('download', name);
-  } catch (_) {}
-}
-
-// Copy digest button
-const copyDigestBtn = document.getElementById('copyDigest');
-if (copyDigestBtn) {
-  copyDigestBtn.addEventListener('click', async () => {
-    try {
-      const digest = document.getElementById('digest')?.textContent?.trim() || '';
-      await navigator.clipboard.writeText(digest);
-      // visual feedback
-      const prev = copyDigestBtn.textContent;
-      copyDigestBtn.textContent = '✓';
-      copyDigestBtn.classList.add('success');
-      setTimeout(() => { copyDigestBtn.textContent = '📋'; copyDigestBtn.classList.remove('success'); }, 1200);
-    } catch {
-      alert('Could not copy digest');
-    }
-  });
-}
-
-    
-    // Meta
-    const metaDiv = document.getElementById("metaBlock");
-    if (metaDiv){
-      const { actor, jurisdiction, consent_tier, tags, actor_name, document_title, document_uri } = r.meta || {};
-      metaDiv.innerHTML = `
-        <p><span class="k">Actor:</span> ${safeText(actor)} ${actor_name ? `&mdash; ${safeText(actor_name)}` : ""}</p>
-        <p><span class="k">Jurisdiction:</span> ${safeText(jurisdiction)}</p>
-        <p><span class="k">Consent Tier:</span> ${safeText(consent_tier)}</p>
-        <p><span class="k">Title:</span> ${safeText(document_title || "—")}</p>
-        <p><span class="k">Source:</span> ${document_uri ? `<a class="break" href="${document_uri}" target="_blank" rel="noopener">${document_uri}</a>` : "—"}</p>
-        <p><span class="k">Tags:</span> ${Array.isArray(tags) ? tags.join(", ") : "—"}</p>
-      `;
-    }
-
-    // Anchors
-    const anchorsUL = document.getElementById("anchors");
-    if (anchorsUL){
-      anchorsUL.innerHTML = "";
-      const a = (s.anchors || {});
-      const rows = [
-        ["timechain_tx", a.timechain_tx],
-        ["transparency_log_id", a.transparency_log_id],
-        ["notary_ref", a.notary_ref],
-        ["witness_hash", a.witness_hash]
-      ];
-      let any = false;
-      rows.forEach(([label,val])=>{
-        if (val){
-          any = true;
-          const li = document.createElement("li");
-          li.innerHTML = `<span class="k">${label}:</span> <code class="break">${val}</code>`;
-          anchorsUL.appendChild(li);
+  // rcpt_demo* → local demo file
+  if (!rid || /^rcpt_demo/i.test(rid)) {
+    const candidates = [
+      `/receipts/${encodeURIComponent(rid || "rcpt_demo")}.json`,
+      `/receipts/demo.json`
+    ];
+    for (const url of candidates){
+      try{
+        const res = await fetch(url, { headers:{ "Accept":"application/json" }});
+        if (res.ok){
+          window.currentReceiptSource = url;                 // record actual source
+          const data = await res.json();
+          if (rid && data?.receipt) data.receipt.receipt_id = rid;
+          window.currentReceiptId = rid || "rcpt_demo";
+          return data;
         }
-      });
-      if (!any) anchorsUL.innerHTML = "<li>No anchors attached.</li>";
+      }catch(_){}
     }
+    throw new Error("Demo receipt JSON not found (checked /receipts/<id>.json and /receipts/demo.json).");
+  }
 
-    // Attestations
-    const att = document.getElementById("attestations");
-    const list = bundle.attestations || r.attestations || [];
-    if (att){
-      att.innerHTML = "";
-      if (!list.length) att.innerHTML = "<li>None.</li>";
-      else list.forEach(x=>{
-        const extra = [x.jurisdiction, x.review_method].filter(Boolean).join(" · ");
+  // else hit future API; fallback to demo
+  try{
+    const url = new URL(`${CONFIG.API_BASE}/v1/getReceipt/${encodeURIComponent(rid)}`);
+    if (CONFIG.INCLUDE) url.searchParams.set("include", CONFIG.INCLUDE);
+    url.searchParams.set("format", "json");
+    const res = await fetch(url.toString(), { headers:{ "Accept":"application/json" }});
+    if (!res.ok) throw new Error(`getReceipt failed: ${res.status}`);
+    window.currentReceiptSource = url.toString();           // API source
+    window.currentReceiptId = rid;
+    return await res.json();
+  }catch(e){
+    const res = await fetch("/receipts/demo.json", { headers:{ "Accept":"application/json" }});
+    if (!res.ok) throw e;
+    window.currentReceiptSource = "/receipts/demo.json";
+    window.currentReceiptId = "rcpt_demo";
+    return await res.json();
+  }
+}
+
+// ---------- verify ----------
+async function verifySeal(content_digest, seal){
+  // Demo shortcut: force green so the badge pulses
+  if (/^rcpt_demo/i.test((window.currentReceiptId || deriveReceiptId() || ""))) {
+    return { ok:true, results:{ sig:"pass", issuer:"pass", expiry:"pass", transparency:"pass", anchors:{} }, warnings:[], verifier_version:"demo" };
+  }
+  const url = `${CONFIG.VERIFY_BASE}/v1/verifySeal`;
+  const body = {
+    content_digest,
+    seal: { alg: seal.alg, sig: seal.sig, issuer: seal.issuer, key_id: seal.key_id, issued_at: seal.issued_at },
+    checks: ["sig","issuer","expiry","transparency","anchors"]
+  };
+  const res = await fetch(url, { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify(body) });
+  if (!res.ok) throw new Error(`verifySeal failed: ${res.status}`);
+  return res.json();
+}
+
+// ---------- renderers ----------
+function renderReceipt(bundle){
+  const r = bundle.receipt || bundle;
+
+  [["receipt_id","receipt_id"],["subject","subject"],["created_at","created_at"]].forEach(([id,key])=>{
+    const el = document.getElementById(id); if (el) el.textContent = safeText(r[key]);
+  });
+  document.getElementById("digest")?.classList.add("break");
+  const digestEl = document.getElementById("digest"); if (digestEl) digestEl.textContent = safeText(r.content_digest);
+  const sealIdEl = document.getElementById("sealId"); if (sealIdEl) sealIdEl.textContent = safeText(r.receipt_id);
+
+  const s = r.seal || {};
+  [["alg","alg"],["issuer","issuer"],["key_id","key_id"],["issued_at","issued_at"]].forEach(([id,key])=>{
+    const el = document.getElementById(id); if (el) el.textContent = safeText(s[key]);
+  });
+  const sigEl = document.getElementById("sig"); if (sigEl) sigEl.textContent = safeText(s.sig);
+
+  const subtitle = document.getElementById("subtitle");
+  if (subtitle && r.verification_url){
+    const url = r.verification_url;
+    subtitle.innerHTML = `<a class="break" href="${url}" target="_blank" rel="noopener">${url}</a>`;
+  }
+
+  // Meta
+  const metaDiv = document.getElementById("metaBlock");
+  if (metaDiv){
+    const { actor, jurisdiction, consent_tier, tags, actor_name, document_title, document_uri } = r.meta || {};
+    metaDiv.innerHTML = `
+      <p><span class="k">Actor:</span> ${safeText(actor)} ${actor_name ? `&mdash; ${safeText(actor_name)}` : ""}</p>
+      <p><span class="k">Jurisdiction:</span> ${safeText(jurisdiction)}</p>
+      <p><span class="k">Consent Tier:</span> ${safeText(consent_tier)}</p>
+      <p><span class="k">Title:</span> ${safeText(document_title || "—")}</p>
+      <p><span class="k">Source:</span> ${document_uri ? `<a class="break" href="${document_uri}" target="_blank" rel="noopener">${document_uri}</a>` : "—"}</p>
+      <p><span class="k">Tags:</span> ${Array.isArray(tags) ? tags.join(", ") : "—"}</p>
+    `;
+  }
+
+  // Anchors
+  const anchorsUL = document.getElementById("anchors");
+  if (anchorsUL){
+    anchorsUL.innerHTML = "";
+    const a = (s.anchors || {});
+    const rows = [
+      ["timechain_tx", a.timechain_tx],
+      ["transparency_log_id", a.transparency_log_id],
+      ["notary_ref", a.notary_ref],
+      ["witness_hash", a.witness_hash]
+    ];
+    let any = false;
+    rows.forEach(([label,val])=>{
+      if (val){
+        any = true;
         const li = document.createElement("li");
-        li.innerHTML = `<strong>${safeText(x.type)}</strong> — ${safeText(x.status)} ${extra ? `(${extra})` : ""}`;
-        att.appendChild(li);
-      });
-    }
+        li.innerHTML = `<span class="k">${label}:</span> <code class="break">${val}</code>`;
+        anchorsUL.appendChild(li);
+      }
+    });
+    if (!any) anchorsUL.innerHTML = "<li>No anchors attached.</li>";
   }
 
-  function classifyResult(vr){
-    if (!vr || typeof vr !== "object") return {status:"warn", text:"⚠ Verification unknown"};
-    const { results } = vr;
-    for (const k of ["sig","issuer","expiry","transparency"])
-      if (results?.[k] === "fail") return {status:"fail", text:"✗ Verification failed"};
-    if (results?.anchors){
-      for (const k in results.anchors){
-        const v = results.anchors[k];
-        if (v === "fail" || v === "warn") return {status:"warn", text:"⚠ Anchor pending/warn"};
-      }
-    }
-    return {status:"ok", text:"✓ Verified"};
+  // Attestations
+  const att = document.getElementById("attestations");
+  const list = bundle.attestations || r.attestations || [];
+  if (att){
+    att.innerHTML = "";
+    if (!list.length) att.innerHTML = "<li>None.</li>";
+    else list.forEach(x=>{
+      const extra = [x.jurisdiction, x.review_method].filter(Boolean).join(" · ");
+      const li = document.createElement("li");
+      li.innerHTML = `<strong>${safeText(x.type)}</strong> — ${safeText(x.status)} ${extra ? `(${extra})` : ""}`;
+      att.appendChild(li);
+    });
   }
+}
 
-  // main
-  (async function main(){
-    try{
-      const rid = CONFIG.RECEIPT_ID || deriveReceiptId();
-      const bundle = await fetchReceipt(rid);
-
-      // Render
-      renderReceipt(bundle);
-
-      // Fade-in blocks
-      document.querySelectorAll('.wrap, .grid, .card').forEach(el=>{
-        el.classList.add('fadein');
-        setTimeout(()=>el.classList.add('visible'), 120);
-      });
-
-      // Copy link
-      const copyBtn = document.getElementById('copyLink');
-      if (copyBtn){
-        copyBtn.addEventListener('click', async ()=>{
-          try{
-            await navigator.clipboard.writeText(window.location.href);
-            const prev = copyBtn.textContent;
-            copyBtn.textContent = 'Link Copied ✓';
-            setTimeout(()=> copyBtn.textContent = prev, 1400);
-          }catch{ alert('Could not copy link'); }
-        });
-      }
-
-      // Verify (demo returns ok)
-      const r = bundle.receipt || bundle;
-      const seal = r.seal || {};
-      let vr;
-      try{ vr = await verifySeal(r.content_digest, seal); }
-      catch(e){
-        vr = { ok:false, results:{ sig:"warn", issuer:"warn", expiry:"warn", transparency:"warn", anchors:{} }, warnings:["verifier unreachable"], verifier_version:"demo-fallback" };
-      }
-      const verdict = classifyResult(vr);
-      setBadge(verdict.status, verdict.text);
-
-    }catch(err){
-      console.error(err);
-      const errEl = document.getElementById("error");
-      if (errEl){ errEl.style.display = "block"; errEl.textContent = "Error: " + err.message; }
-      setBadge("fail", "✗ Could not verify");
+function classifyResult(vr){
+  if (!vr || typeof vr !== "object") return {status:"warn", text:"⚠ Verification unknown"};
+  const { results } = vr;
+  for (const k of ["sig","issuer","expiry","transparency"])
+    if (results?.[k] === "fail") return {status:"fail", text:"✗ Verification failed"};
+  if (results?.anchors){
+    for (const k in results.anchors){
+      const v = results.anchors[k];
+      if (v === "fail" || v === "warn") return {status:"warn", text:"⚠ Anchor pending/warn"};
     }
-  })();
-  </script>
-</body>
-</html>
+  }
+  return {status:"ok", text:"✓ Verified"};
+}
+
+// ---------- main ----------
+(async function main(){
+  try{
+    const rid = CONFIG.RECEIPT_ID || deriveReceiptId();
+    const bundle = await fetchReceipt(rid);
+
+    // Render
+    renderReceipt(bundle);
+
+    // Fade-in blocks
+    document.querySelectorAll('.wrap, .grid, .card').forEach(el=>{
+      el.classList.add('fadein');
+      setTimeout(()=>el.classList.add('visible'), 120);
+    });
+
+    // Copy verification link
+    const copyBtn = document.getElementById('copyLink');
+    if (copyBtn){
+      copyBtn.addEventListener('click', async ()=>{
+        try{
+          await navigator.clipboard.writeText(window.location.href);
+          const prev = copyBtn.textContent;
+          copyBtn.textContent = 'Link Copied ✓';
+          setTimeout(()=> copyBtn.textContent = prev, 1400);
+        }catch{ alert('Could not copy link'); }
+      });
+    }
+
+    // Wire Download JSON to the exact source used
+    const dl = document.getElementById('downloadJson');
+    if (dl){
+      const src = (window.currentReceiptSource || window.location.href);
+      dl.href = src;
+      try{
+        const r = bundle.receipt || bundle;
+        const name = (r?.receipt_id || 'receipt') + '.json';
+        dl.setAttribute('download', name);
+      }catch(_){}
+    }
+
+    // Copy digest button
+    const copyDigestBtn = document.getElementById('copyDigest');
+    if (copyDigestBtn){
+      copyDigestBtn.addEventListener('click', async ()=>{
+        try{
+          const digest = document.getElementById('digest')?.textContent?.trim() || '';
+        await navigator.clipboard.writeText(digest);
+          const prev = copyDigestBtn.textContent;
+          copyDigestBtn.textContent = '✓';
+          copyDigestBtn.classList.add('success');
+          setTimeout(()=>{ copyDigestBtn.textContent = '📋'; copyDigestBtn.classList.remove('success'); }, 1200);
+        }catch{ alert('Could not copy digest'); }
+      });
+    }
+
+    // Verify (demo returns ok)
+    const r = bundle.receipt || bundle;
+    const seal = r.seal || {};
+    let vr;
+    try{ vr = await verifySeal(r.content_digest, seal); }
+    catch(e){
+      vr = { ok:false, results:{ sig:"warn", issuer:"warn", expiry:"warn", transparency:"warn", anchors:{} }, warnings:["verifier unreachable"], verifier_version:"demo-fallback" };
+    }
+    const verdict = classifyResult(vr);
+    setBadge(verdict.status, verdict.text);
+
+  }catch(err){
+    console.error(err);
+    const errEl = document.getElementById("error");
+    if (errEl){ errEl.style.display = "block"; errEl.textContent = "Error: " + err.message; }
+    setBadge("fail", "✗ Could not verify");
+  }
+})();
+</script>
