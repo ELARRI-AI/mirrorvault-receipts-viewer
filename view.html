@@ -30,7 +30,7 @@
     #anchors li, #attestations li{ margin:.25rem 0; }
 
     /* Share strip */
-<div class="share-strip" aria-label="Share controls">
+
   <div id="statusBadge" class="badge" aria-live="polite">Checking…</div>
 
   <button id="copyLink" class="copy-cta" type="button" aria-label="Copy verification link">
@@ -52,8 +52,6 @@
 
 
     /* Buttons */
-  
-    <a class="copy-cta" href="certificate.html?id=rcpt_demo_11_11_codex">Open Certificate</a>
 
     .badge{
       display:inline-block; margin-right:.6rem; margin-top:.25rem;
@@ -156,12 +154,26 @@ body.presscard .wrap::after {
   <div class="wrap">
     <h1>MirrorVault Verified Receipt</h1>
 
-    <div class="share-strip" aria-label="Share controls">
-      <div id="statusBadge" class="badge" aria-live="polite">Checking…</div>
-      <button id="copyLink" class="copy-cta" type="button" aria-label="Copy verification link">Copy Verification Link</button>
-      <a id="downloadJson" class="copy-cta" href="#" download>Download JSON</a>
-      <button id="printCert" class="copy-cta" type="button" aria-label="Download certificate PDF">Download Certificate (PDF)</button>
-    </div>
+<div class="share-strip" aria-label="Share controls">
+  <div id="statusBadge" class="badge" aria-live="polite">Checking…</div>
+
+  <button id="copyLink" class="copy-cta" type="button" aria-label="Copy verification link">
+    Copy Verification Link
+  </button>
+
+  <a id="downloadJson" class="copy-cta" href="#" download>
+    Download JSON
+  </a>
+
+  <button id="printCert" class="copy-cta" type="button" aria-label="Download certificate PDF">
+    Download Certificate (PDF)
+  </button>
+
+  <button id="openCert" class="copy-cta" type="button" aria-label="Open certificate">
+    Open Certificate
+  </button>
+</div>
+
 
     <p id="subtitle" class="k"></p>
 
