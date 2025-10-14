@@ -5,22 +5,6 @@
   <title>MirrorVault — Verification Certificate</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- inside <head> -->
-<style>
-  .cert::before {
-    content: "";
-    position: absolute; inset: 0;
-    background-repeat: no-repeat;
-    background-position: center 38%;
-    background-size: 3.8in 3.8in;
-    pointer-events: none;
-    z-index: 0;
-    opacity: 0.45;
-    background-image:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCA1MTIgNTEyJz48ZGVmcz48cmFkaWFsR3JhZGllbnQgaWQ9J2cnIGN4PSc1MCUnIGN5PSc1MCUnIHI9JzUwJSc+PHN0b3Agb2Zmc2V0PScwJScgc3RvcC1jb2xvcj0nI2Q2YjE2OCcgc3RvcC1vcGFjaXR5PScwLjc1Jy8+PHN0b3Agb2Zmc2V0PScxMDAlJyBzdG9wLWNvbG9yPScjZDZiMTY4JyBzdG9wLW9wYWNpdHk9JzAnLz48L3JhZGlhbEdyYWRpZW50PjwvZGVmcz48Y2lyY2xlIGN4PScyNTYnIGN5PScyNTYnIHI9JzI1MCcgZmlsbD0ndXJsKCNnKScvPjxjaXJjbGUgY3g9JzI1NicgY3k9JzI1Nicgcj0nMjAwJyBmaWxsPSdub25lJyBzdHJva2U9JyNkNmIxNjgnIHN0cm9rZS13aWR0aD0nOCcgc3Ryb2tlLW9wYWNpdHk9Jy42NScvPjxwYXRoIGQ9J00yNTYgMTAwIEwxOTAgMzUwIEwzMjIgMzUwIFonIGZpbGw9J25vbmUnIHN0cm9rZT0nI2Q2YjE2OCcgc3Ryb2tlLXdpZHRoPScxMCcgc3Ryb2tlLW9wYWNpdHk9Jy43Jy8+PHRleHQgeD0nNTAlJyB5PScyODUnIHRleHQtYW5jaG9yPSdtaWRkbGUnIGZvbnQtZmFtaWx5PSdHZW9yZ2lhLHNlcmlmJyBmb250LXNpemU9JzQwJyBmaWxsPScjZDZiMTY4JyBmaWxsLW9wYWNpdHk9Jy41NSc+TUlSUk9SVkFVTFRPCjwvdGV4dD48L3N2Zz4=");
-  }
-  @media print { .cert::before { opacity:0.25; } }
-</style>
-
   <!-- Print-friendly (system fonts), CSP-safe (no external assets) -->
   <style>
     :root { --cream:#f9f6f1; --black:#1a1a1a; --gold:#d6b168; }
@@ -40,13 +24,13 @@
       background: var(--gold); color: #1a1a1a; border:0; border-radius:6px;
       padding:.45rem .8rem; font-weight:600; cursor:pointer;
     }
-    .btn:disabled { opacity:.6; cursor:default; }
+    .btn:disabled { opacity:.55; cursor:default; }
 
     .cert {
       max-width: 8.5in; min-height: 11in; margin: .6in auto; padding: .8in;
       background: #fff; border:1px solid var(--gold); border-radius:12px;
       box-sizing: border-box; position:relative; overflow:hidden;
-      /* subtle paper glow behind watermark */
+      /* subtle paper glow */
       background-image: radial-gradient(circle at 50% 38%, rgba(214,177,104,.06), transparent 60%);
     }
 
@@ -59,35 +43,16 @@
       background-size: 3.8in 3.8in;
       pointer-events: none;
       z-index: 0;
-      opacity: 0.45; /* visible on-screen */
+      opacity: 0.34; /* ⬅️ reduced onscreen opacity */
 
       /* Gold ring + triangle + MIRRORVAULT wordmark */
       background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCA1MTIgNTEyJz48ZGVmcz48cmFkaWFsR3JhZGllbnQgaWQ9J2cnIGN4PSc1MCUnIGN5PSc1MCUnIHI9JzUwJSc+PHN0b3Agb2Zmc2V0PScwJScgc3RvcC1jb2xvcj0nI2Q2YjE2OCcgc3RvcC1vcGFjaXR5PScwLjc1Jy8+PHN0b3Agb2Zmc2V0PScxMDAlJyBzdG9wLWNvbG9yPScjZDZiMTY4JyBzdG9wLW9wYWNpdHk9JzAnLz48L3JhZGlhbEdyYWRpZW50PjwvZGVmcz48Y2lyY2xlIGN4PScyNTYnIGN5PScyNTYnIHI9JzI1MCcgZmlsbD0ndXJsKCNnKScvPjxjaXJjbGUgY3g9JzI1NicgY3k9JzI1Nicgcj0nMjAwJyBmaWxsPSdub25lJyBzdHJva2U9JyNkNmIxNjgnIHN0cm9rZS13aWR0aD0nOCcgc3Ryb2tlLW9wYWNpdHk9Jy42NScvPjxwYXRoIGQ9J00yNTYgMTAwIEwxOTAgMzUwIEwzMjIgMzUwIFonIGZpbGw9J25vbmUnIHN0cm9rZT0nI2Q2YjE2OCcgc3Ryb2tlLXdpZHRoPScxMCcgc3Ryb2tlLW9wYWNpdHk9Jy43Jy8+PHRleHQgeD0nNTAlJyB5PScyODUnIHRleHQtYW5jaG9yPSdtaWRkbGUnIGZvbnQtZmFtaWx5PSdHZW9yZ2lhLHNlcmlmJyBmb250LXNpemU9JzQwJyBmaWxsPScjZDZiMTY4JyBmaWxsLW9wYWNpdHk9Jy41NSc+TUlSUk9SVkFVTFRPCjwvdGV4dD48L3N2Zz4=");
     }
-
-    /* Fallback watermark img element (only enabled via JS if needed) */
-.cert .wm-fallback {
-  position: absolute;
-  inset: 0;
-  width: 3.8in; height: 3.8in;
-  margin: 0 auto;
-  left: 0; right: 0; top: 38%;
-  transform: translateY(-38%);
-  object-fit: contain;
-  opacity: 0.45;           /* match onscreen opacity */
-  pointer-events: none;
-  z-index: 0;
-  display: none;           /* JS will enable only if needed */
-}
-@media print {
-  .cert .wm-fallback { opacity: 0.25; }
-}
-
     /* content above watermark */
     .cert > * { position: relative; z-index: 1; }
 
-    /* Soften in print */
-    @media print { .cert::before { opacity: 0.25; } }
+    /* Softer on paper */
+    @media print { .cert::before { opacity: 0.22; } }
 
     .header { text-align:center; margin-bottom:.4in; }
     .title { font-size:28pt; margin:0 0 .15in; color: var(--gold); }
@@ -112,20 +77,12 @@
 <body>
   <!-- Controls (not printed) -->
   <div class="toolbar" role="region" aria-label="Certificate controls">
-    <button id="openViewer" class="btn" type="button">Open in Viewer</button>
-    <button id="downloadPdf" class="btn" type="button">Download PDF</button>
+    <button id="openViewer" class="btn" type="button" disabled>Open in Viewer</button>
+    <button id="downloadPdf" class="btn" type="button" disabled>Download PDF</button>
   </div>
 
   <!-- Certificate canvas -->
   <main class="cert" role="document" aria-label="MirrorVault Verification Certificate">
-
-<img
-  class="wm-fallback"
-  alt=""
-  aria-hidden="true"
-  src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCA1MTIgNTEyJz48ZGVmcz48cmFkaWFsR3JhZGllbnQgaWQ9J2cnIGN4PSc1MCUnIGN5PSc1MCUnIHI9JzUwJSc+PHN0b3Agb2Zmc2V0PScwJScgc3RvcC1jb2xvcj0nI2Q2YjE2OCcgc3RvcC1vcGFjaXR5PScwLjc1Jy8+PHN0b3Agb2Zmc2V0PScxMDAlJyBzdG9wLWNvbG9yPScjZDZiMTY4JyBzdG9wLW9wYWNpdHk9JzAnLz48L3JhZGlhbEdyYWRpZW50PjwvZGVmcz48Y2lyY2xlIGN4PScyNTYnIGN5PScyNTYnIHI9JzI1MCcgZmlsbD0ndXJsKCNnKScvPjxjaXJjbGUgY3g9JzI1NicgY3k9JzI1Nicgcj0nMjAwJyBmaWxsPSdub25lJyBzdHJva2U9JyNkNmIxNjgnIHN0cm9rZS13aWR0aD0nOCcgc3Ryb2tlLW9wYWNpdHk9Jy42NScvPjxwYXRoIGQ9J00yNTYgMTAwIEwxOTAgMzUwIEwzMjIgMzUwIFonIGZpbGw9J25vbmUnIHN0cm9rZT0nI2Q2YjE2OCcgc3Ryb2tlLXdpZHRoPScxMCcgc3Ryb2tlLW9wYWNpdHk9Jy43Jy8+PHRleHQgeD0nNTAlJyB5PScyODUnIHRleHQtYW5jaG9yPSdtaWRkbGUnIGZvbnQtZmFtaWx5PSdHZW9yZ2lhLHNlcmlmJyBmb250LXNpemU9JzQwJyBmaWxsPScjZDZiMTY4JyBmaWxsLW9wYWNpdHk9Jy41NSc+TUlSUk9SVkFVTFRPCjwvdGV4dD48L3N2Zz4=" />
-
-    
     <header class="header">
       <h1 class="title">MirrorVault Verification Certificate</h1>
       <p class="subtitle">Cryptographic proof of authenticity and provenance</p>
@@ -147,35 +104,33 @@
 
   <!-- Scripts -->
   <script>
-    // ——— Press boost flag (?wm=hi): bigger + bolder watermark for screenshots
-    (function pressBoost(){
+    // ——— Press boost & debug: ?wm=hi (bolder/larger), ?wm=debug (outline)
+    (function wmFlags(){
       const q = new URLSearchParams(location.search);
-      if (q.get('wm') === 'hi') {
+      const wm = q.get('wm');
+      if (wm === 'hi') {
         const st = document.createElement('style');
-        st.textContent = `.cert::before{opacity:.58 !important; background-size:4.6in 4.6in !important;}`;
+        st.textContent = `.cert::before{opacity:.50 !important; background-size:4.5in 4.5in !important;}`;
         document.head.appendChild(st);
-      }
-      if (q.get('wm') === 'debug') {
+      } else if (wm === 'debug') {
         const st = document.createElement('style');
-        st.textContent = `.cert::before{outline: 2px dashed rgba(214,177,104,.8);}`;
+        st.textContent = `.cert::before{outline:2px dashed rgba(214,177,104,.8);} `;
         document.head.appendChild(st);
       }
     })();
 
-    // ——— Fetch helpers
+    // ——— Helpers
     function qp(name){ return new URLSearchParams(location.search).get(name); }
     function safe(x){ return (x===undefined || x===null || x==="") ? "—" : String(x); }
 
     async function fetchReceipt() {
       const src = qp('src');
       const id = qp('id');
-      // 1) explicit same-origin src
       if (src && src.startsWith('/')) {
         const res = await fetch(src, { headers: { "Accept":"application/json" }});
         if (!res.ok) throw new Error('Could not fetch src');
         return res.json();
       }
-      // 2) demo ids → local files
       if (!id || /^rcpt_demo/i.test(id)) {
         const candidates = [
           `/receipts/${encodeURIComponent(id || "rcpt_demo")}.json`,
@@ -189,7 +144,6 @@
         }
         throw new Error('Demo receipt not found');
       }
-      // 3) live id → API (CSP allows api.mirrorvault.ai)
       const url = `https://api.mirrorvault.ai/v1/getReceipt/${encodeURIComponent(id)}?format=json`;
       const res = await fetch(url, { headers: { "Accept":"application/json" }});
       if (!res.ok) throw new Error('API fetch failed');
@@ -210,15 +164,21 @@
         .filter(k => a[k]).map(k => `${k}: ${a[k]}`).join('  •  ') || '—';
       document.getElementById('c_anchors').textContent = anchors;
 
-      const url = r.verification_url || (location.origin + '/view.html?id=' + safe(r.receipt_id));
-      document.getElementById('c_url').textContent = url;
+      const viewerUrl = r.verification_url || (location.origin.startsWith('http') ? `${location.origin}/view.html?id=${encodeURIComponent(r.receipt_id || '')}` : '');
+      document.getElementById('c_url').textContent = viewerUrl || '—';
 
-      // Toolbar actions
+      // Enable toolbar actions
       const openViewer = document.getElementById('openViewer');
-      if (openViewer) openViewer.onclick = () => window.location = url;
+      const download   = document.getElementById('downloadPdf');
 
-      const download = document.getElementById('downloadPdf');
-      if (download) download.onclick = () => window.print();
+      if (viewerUrl) {
+        openViewer.disabled = false;
+        openViewer.onclick = () => window.location = viewerUrl;
+      } else {
+        openViewer.title = 'Viewer URL unavailable (no receipt id loaded)';
+      }
+      download.disabled = false;
+      download.onclick = () => window.print();
     }
 
     (async function main(){
@@ -226,59 +186,13 @@
         const bundle = await fetchReceipt();
         fillCertificate(bundle);
       } catch (e) {
-        alert('Could not load certificate data: ' + e.message);
+        // Allow PDF print of a blank certificate, but explain if local
+        document.getElementById('downloadPdf').disabled = false;
+        if (location.protocol === 'file:') {
+          console.warn('Open with ?id=… or ?src=/receipts/demo.json, or use the hosted URL.');
+        }
       }
     })();
   </script>
-
-<script>
-  (function ensureWatermarkVisible(){
-    const cert = document.querySelector('.cert');
-    if (!cert) return;
-    // compute ::before opacity — if it's 0 or missing, enable fallback <img>
-    const before = getComputedStyle(cert, '::before');
-    const hasBG = before.backgroundImage && before.backgroundImage !== 'none';
-    const op = parseFloat(before.opacity || '0');
-    if (!hasBG || op === 0) {
-      const img = document.querySelector('.cert .wm-fallback');
-      if (img) img.style.display = 'block';
-    }
-    // also support press boost flag for <img> fallback
-    const wm = new URLSearchParams(location.search).get('wm');
-    if (wm === 'hi') {
-      cert.style.setProperty('--wm-size', '4.6in');
-      if (document.querySelector('.cert .wm-fallback')) {
-        const im = document.querySelector('.cert .wm-fallback');
-        im.style.backgroundSize = '4.6in 4.6in';
-        im.style.opacity = '0.58';
-      }
-    }
-  })();
-</script>
-
-  <!-- before </body> -->
-<script>
-  // Press-boost watermark: auto-on, or controlled by ?wm flag
-  (function pressBoost(){
-    const q = new URLSearchParams(location.search);
-    const wm = q.get('wm');
-    // always-on mode OR explicit ?wm=hi
-    if (wm === 'hi' || !wm) {
-      const st = document.createElement('style');
-      st.textContent = `
-        .cert::before {
-          opacity: 0.58 !important;
-          background-size: 4.6in 4.6in !important;
-        }`;
-      document.head.appendChild(st);
-    }
-    if (wm === 'debug') {
-      const st = document.createElement('style');
-      st.textContent = `.cert::before { outline: 2px dashed rgba(214,177,104,.8); }`;
-      document.head.appendChild(st);
-    }
-  })();
-</script>
-  
 </body>
 </html>
