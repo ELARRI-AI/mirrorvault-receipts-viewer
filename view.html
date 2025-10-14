@@ -30,10 +30,26 @@
     #anchors li, #attestations li{ margin:.25rem 0; }
 
     /* Share strip */
-    .share-strip {
-      position: sticky; top: .75rem; float: right; margin-left: .5rem;
-      display: inline-flex; gap: .5rem; align-items: center;
-    }
+<div class="share-strip" aria-label="Share controls">
+  <div id="statusBadge" class="badge" aria-live="polite">Checking…</div>
+
+  <button id="copyLink" class="copy-cta" type="button" aria-label="Copy verification link">
+    Copy Verification Link
+  </button>
+
+  <a id="downloadJson" class="copy-cta" href="#" download>
+    Download JSON
+  </a>
+
+  <button id="printCert" class="copy-cta" type="button" aria-label="Download certificate PDF">
+    Download Certificate (PDF)
+  </button>
+
+  <button id="openCert" class="copy-cta" type="button" aria-label="Open certificate">
+    Open Certificate
+  </button>
+</div>
+
 
     /* Buttons */
   
@@ -294,6 +310,39 @@
       subtitle.innerHTML = `<a class="break" href="${url}" target="_blank" rel="noopener">${url}</a>`;
     }
 
+// Open Certificate (standalone, press watermark on by default)
+const openCertBtn = document.getElementById('openCert');
+if (openCertBtn) {
+  const base = (location.origin.startsWith('http'))
+    ? location.origin
+    : 'https://verify.mirrorvault.ai';
+  const certUrl = (r?.receipt_id)
+    ? `${base}/certificate.html?id=${encodeURIComponent(r.receipt_id)}&wm=hi`
+    : '';
+
+  if (certUrl) {
+    openCertBtn.disabled = false;
+    openCertBtn.onclick = () => window.open(certUrl, '_blank', 'noopener');
+    openCertBtn.title = 'Open certificate in a new tab';
+  } else {
+    openCertBtn.disabled = true;
+    openCertBtn.title = 'Certificate unavailable (no receipt ID loaded)';
+  }
+}
+
+    const sub = document.getElementById('subtitle');
+if (sub && r?.receipt_id) {
+  const base = (location.origin.startsWith('http'))
+    ? location.origin
+    : 'https://verify.mirrorvault.ai';
+  const certUrl = `${base}/certificate.html?id=${encodeURIComponent(r.receipt_id)}&wm=hi`;
+  sub.insertAdjacentHTML(
+    'beforeend',
+    ` &nbsp;·&nbsp; <a href="${certUrl}" target="_blank" rel="noopener">Open Certificate</a>`
+  );
+}
+
+    
     // Meta
     const metaDiv = document.getElementById("metaBlock");
     if (metaDiv){
