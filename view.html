@@ -8,17 +8,23 @@
   <style>
     /* ——— Base MirrorStyle ——— */
     :root { --cream:#f9f6f1; --black:#1a1a1a; --gold:#d6b168; }
-    :root[data-theme="partner"]{ --cream:#fbfaf7; --black:#101418; --gold:#c4a455; }
 
     body{
       font-family: ui-serif,"Crimson Pro",Georgia,serif;
       background:var(--cream); color:var(--black); margin:0;
     }
     .wrap{
+      position: relative;
       max-width:860px; margin:2rem auto; padding:1.5rem;
       background:#fff; border:1px solid var(--gold); border-radius:12px;
     }
-    h1{ color:var(--gold); margin:0 0 .75rem; }
+    h1{ color:var(--gold); margin:0 0 .5rem; }
+
+    /* Status bar */
+    .status-bar{
+      margin:.3rem 0 .7rem; font-weight:700; color:#1f7a1f;
+    }
+
     .grid{ display:grid; grid-template-columns:1fr 1fr; gap:1.25rem; }
     .card{ border:1px solid #eee; border-left:4px solid var(--gold); padding:1.15rem; border-radius:8px; background:#fff; }
     .card h3{ margin:0 0 .6rem; }
@@ -30,29 +36,10 @@
     #anchors li, #attestations li{ margin:.25rem 0; }
 
     /* Share strip */
-
-  <div id="statusBadge" class="badge" aria-live="polite">Checking…</div>
-
-  <button id="copyLink" class="copy-cta" type="button" aria-label="Copy verification link">
-    Copy Verification Link
-  </button>
-
-  <a id="downloadJson" class="copy-cta" href="#" download>
-    Download JSON
-  </a>
-
-  <button id="printCert" class="copy-cta" type="button" aria-label="Download certificate PDF">
-    Download Certificate (PDF)
-  </button>
-
-  <button id="openCert" class="copy-cta" type="button" aria-label="Open certificate">
-    Open Certificate
-  </button>
-</div>
-
-
-    /* Buttons */
-
+    .share-strip {
+      position: sticky; top: .75rem; float: right; margin-left: .5rem;
+      display: inline-flex; gap: .5rem; align-items: center;
+    }
     .badge{
       display:inline-block; margin-right:.6rem; margin-top:.25rem;
       padding:.2rem .6rem; border-radius:6px; font-weight:700;
@@ -85,27 +72,29 @@
     .fadein{ opacity:0; transition:opacity .45s ease-in; }
     .fadein.visible{ opacity:1; }
 
-    /* Press mode */
-    body.press .copy-cta, body.press .icon-btn, body.press #downloadJson { display: none !important; }
-    body.press .press-explainer { display: block !important; }
-    .press-explainer { display:none; color:#555; margin-top:.5rem; }
+    /* Hide any old inline certificate links (we use the real button now) */
+    body.presscard #subtitle a[href*="certificate.html"]{ display:none !important; }
 
-    /* Certificate print */
-    @media print {
-      body * { visibility: hidden !important; }
-      .certificate, .certificate * { visibility: visible !important; }
-      .certificate { position: absolute; inset: 0; padding: 1in; background: #fff; color: #000; }
+    /* ——— Press Card Mode —— */
+    body.presscard {
+      background: radial-gradient(circle at 50% 25%, #faf7ee, #efe4c4 90%);
+      padding: 2rem;
     }
-    .certificate {
-      display: none; background: #fff; color: #000; border: 1px solid var(--gold); border-radius: 12px;
-      margin: 0 auto; max-width: 8.5in; min-height: 11in; box-sizing: border-box;
-      background-image: radial-gradient(circle at 50% 40%, rgba(214,177,104,.08), transparent 60%);
+    body.presscard .wrap {
+      border: 3px solid var(--gold);
+      border-radius: 16px;
+      box-shadow: 0 0 40px rgba(214,177,104,0.45);
+      background: #fffef9;
+      max-width: 880px;
     }
-    .certificate h1 { font-size: 28pt; margin: 0 0 .3in; color: #d6b168; text-align: center; }
-    .certificate .row { margin: .2in 0; font-size: 12pt; }
-    .certificate .label { font-weight: 600; display: inline-block; width: 1.8in; }
-    .certificate .value { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; word-break: break-word; }
-    .certificate .seal { margin-top: .4in; text-align: center; font-weight: 700; }
+    body.presscard .wrap::after {
+      content:"MIRRORVAULT PRESS EDITION";
+      position:absolute;
+      bottom:1.2rem; right:2rem;
+      font-family: "Crimson Pro", serif;
+      font-size:10pt; letter-spacing:1px;
+      color:rgba(214,177,104,0.65);
+    }
 
     /* Mobile harmony */
     @media (max-width:720px){
@@ -114,7 +103,7 @@
       .k{ min-width:7.5rem; }
     }
 
-    /* Dark mode support (uses your existing toggle rules, if any) */
+    /* Dark mode compatibility */
     body.dark { background:#1a1a1a; color:#f9f6f1; }
     body.dark .wrap { background:#171717; color:#f9f6f1; border-color:var(--gold); }
     body.dark .card { background:#181818; border-color:#333; border-left-color:var(--gold); }
@@ -125,55 +114,33 @@
     body.dark .badge.warn { background:#3a2e08; color:#ffd36a; border-color:#9b6b00; }
     body.dark .badge.fail { background:#3a0f0f; color:#ffb2b2; border-color:#9b1c1c; }
     body.dark .copy-cta { background:var(--gold); color:#1a1a1a; }
-
-/* —— Press Card Mode —— */
-body.presscard {
-  background: radial-gradient(circle at 50% 25%, #faf7ee, #efe4c4 90%);
-  padding: 2rem;
-}
-body.presscard .wrap {
-  border: 3px solid var(--gold);
-  border-radius: 16px;
-  box-shadow: 0 0 40px rgba(214,177,104,0.45);
-  background: #fffef9;
-  max-width: 880px;
-}
-body.presscard .wrap::after {
-  content:"MIRRORVAULT PRESS EDITION";
-  position:absolute;
-  bottom:1.2rem; right:2rem;
-  font-family: "Crimson Pro", serif;
-  font-size:10pt; letter-spacing:1px;
-  color:rgba(214,177,104,0.65);
-}
-
-    
   </style>
 </head>
 <body>
   <div class="wrap">
     <h1>MirrorVault Verified Receipt</h1>
 
-<div class="share-strip" aria-label="Share controls">
-  <div id="statusBadge" class="badge" aria-live="polite">Checking…</div>
+    <!-- Status + Share strip -->
+    <div class="status-bar">✓ Verified</div>
+    <div class="share-strip" aria-label="Share controls">
+      <div id="statusBadge" class="badge" aria-live="polite">Checking…</div>
 
-  <button id="copyLink" class="copy-cta" type="button" aria-label="Copy verification link">
-    Copy Verification Link
-  </button>
+      <button id="copyLink" class="copy-cta" type="button" aria-label="Copy verification link">
+        Copy Verification Link
+      </button>
 
-  <a id="downloadJson" class="copy-cta" href="#" download>
-    Download JSON
-  </a>
+      <a id="downloadJson" class="copy-cta" href="#" download>
+        Download JSON
+      </a>
 
-  <button id="printCert" class="copy-cta" type="button" aria-label="Download certificate PDF">
-    Download Certificate (PDF)
-  </button>
+      <button id="printCert" class="copy-cta" type="button" aria-label="Download certificate PDF">
+        Download Certificate (PDF)
+      </button>
 
-  <button id="openCert" class="copy-cta" type="button" aria-label="Open certificate">
-    Open Certificate
-  </button>
-</div>
-
+      <button id="openCert" class="copy-cta" type="button" aria-label="Open certificate">
+        Open Certificate
+      </button>
+    </div>
 
     <p id="subtitle" class="k"></p>
 
@@ -217,22 +184,6 @@ body.presscard .wrap::after {
 
     <div id="error" role="alert" style="color:#9b1c1c;font-weight:600;display:none;margin-top:.5rem"></div>
     <div class="k" style="text-align:center;margin-top:1rem">Seal ID <span id="sealId">—</span></div>
-
-    <!-- Print Certificate Canvas -->
-    <section class="certificate" role="document" aria-label="Verification certificate">
-      <h1>MirrorVault Verification Certificate</h1>
-      <div class="row"><span class="label">Receipt ID</span> <span id="cert_receipt" class="value">—</span></div>
-      <div class="row"><span class="label">Subject</span> <span id="cert_subject" class="value">—</span></div>
-      <div class="row"><span class="label">Digest</span> <span id="cert_digest" class="value break">—</span></div>
-      <div class="row"><span class="label">Issuer</span> <span id="cert_issuer" class="value break">—</span></div>
-      <div class="row"><span class="label">Issued At</span> <span id="cert_issued" class="value">—</span></div>
-      <div class="row"><span class="label">Anchors</span> <span id="cert_anchors" class="value break">—</span></div>
-      <div class="row"><span class="label">Verification URL</span> <span id="cert_url" class="value break">—</span></div>
-      <div class="seal">✓ Verified — MirrorVault Codex</div>
-    </section>
-
-    <!-- Press mode explainer -->
-    <p class="press-explainer">This page shows a live, verifiable receipt of authenticity (cryptographic seal, issuer, and transparency anchors). Copy the link for your article or screenshot this view.</p>
   </div>
 
   <!-- Viewer logic -->
@@ -345,48 +296,6 @@ body.presscard .wrap::after {
       subtitle.innerHTML = `<a class="break" href="${url}" target="_blank" rel="noopener">${url}</a>`;
     }
 
-// Open Certificate (standalone, press watermark on by default)
-const openCertBtn = document.getElementById('openCert');
-if (openCertBtn) {
-  const base = (location.origin.startsWith('http'))
-    ? location.origin
-    : 'https://verify.mirrorvault.ai';
-  const certUrl = (r?.receipt_id)
-    ? `${base}/certificate.html?id=${encodeURIComponent(r.receipt_id)}&wm=hi`
-    : '';
-
-  if (certUrl) {
-    openCertBtn.disabled = false;
-    openCertBtn.onclick = () => window.open(certUrl, '_blank', 'noopener');
-    openCertBtn.title = 'Open certificate in a new tab';
-  } else {
-    openCertBtn.disabled = true;
-    openCertBtn.title = 'Certificate unavailable (no receipt ID loaded)';
-  }
-}
-
-// —— Press Card mode toggle (?presscard=1) —— //
-(function pressCardMode(){
-  const q = new URLSearchParams(location.search);
-  if (q.get('presscard') === '1') {
-    document.body.classList.add('presscard');
-  }
-})();
-
-    
-    const sub = document.getElementById('subtitle');
-if (sub && r?.receipt_id) {
-  const base = (location.origin.startsWith('http'))
-    ? location.origin
-    : 'https://verify.mirrorvault.ai';
-  const certUrl = `${base}/certificate.html?id=${encodeURIComponent(r.receipt_id)}&wm=hi`;
-  sub.insertAdjacentHTML(
-    'beforeend',
-    ` &nbsp;·&nbsp; <a href="${certUrl}" target="_blank" rel="noopener">Open Certificate</a>`
-  );
-}
-
-    
     // Meta
     const metaDiv = document.getElementById("metaBlock");
     if (metaDiv){
@@ -477,10 +386,9 @@ if (sub && r?.receipt_id) {
   // main
   (async function main(){
     try{
-      // theme + press mode params
-      const qp = new URLSearchParams(location.search);
-      const theme = qp.get('theme'); if (theme) document.documentElement.setAttribute('data-theme', theme);
-      if (qp.get('press')) document.body.classList.add('press');
+      // Press Card mode toggle (?presscard=1)
+      const q = new URLSearchParams(location.search);
+      if (q.get('presscard') === '1') document.body.classList.add('presscard');
 
       const rid = CONFIG.RECEIPT_ID || deriveReceiptId();
       const bundle = await fetchReceipt(rid);
@@ -488,7 +396,6 @@ if (sub && r?.receipt_id) {
       // Render
       renderReceipt(bundle);
       const r = bundle.receipt || bundle;
-      window._lastReceipt = r;
 
       // Fade-in blocks
       document.querySelectorAll('.wrap, .grid, .card').forEach(el=>{
@@ -509,7 +416,7 @@ if (sub && r?.receipt_id) {
         });
       }
 
-      // Download JSON to the exact source
+      // Download JSON (to the exact source used)
       const dl = document.getElementById('downloadJson');
       if (dl){
         const src = (window.currentReceiptSource || window.location.href);
@@ -538,28 +445,30 @@ if (sub && r?.receipt_id) {
         });
       }
 
-      // Print Certificate (PDF)
+      // Download Certificate (PDF) — print page
       const certBtn = document.getElementById('printCert');
       if (certBtn){
-        certBtn.addEventListener('click', ()=>{
-          // Fill certificate fields
-          document.getElementById('cert_receipt').textContent = r.receipt_id || '—';
-          document.getElementById('cert_subject').textContent = r.subject || '—';
-          document.getElementById('cert_digest').textContent = r.content_digest || '—';
-          document.getElementById('cert_issuer').textContent = (r.seal?.issuer) || '—';
-          document.getElementById('cert_issued').textContent = (r.seal?.issued_at) || '—';
-          const a = r.seal?.anchors || {};
-          const anchors = ['timechain_tx','transparency_log_id','notary_ref','witness_hash']
-            .filter(k => a[k]).map(k => `${k}: ${a[k]}`).join('  •  ') || '—';
-          document.getElementById('cert_anchors').textContent = anchors;
-          document.getElementById('cert_url').textContent = location.href;
+        certBtn.addEventListener('click', ()=> window.print());
+      }
 
-          // Show certificate, print, hide again
-          const cert = document.querySelector('.certificate');
-          cert.style.display = 'block';
-          window.print();
-          setTimeout(()=>{ cert.style.display = 'none'; }, 300);
-        });
+      // Open Certificate (standalone, press watermark on)
+      const openCertBtn = document.getElementById('openCert');
+      if (openCertBtn) {
+        const base = (location.origin.startsWith('http'))
+          ? location.origin
+          : 'https://verify.mirrorvault.ai';
+        const certUrl = (r?.receipt_id)
+          ? `${base}/certificate.html?id=${encodeURIComponent(r.receipt_id)}&wm=hi`
+          : '';
+
+        if (certUrl) {
+          openCertBtn.disabled = false;
+          openCertBtn.onclick = () => window.open(certUrl, '_blank', 'noopener');
+          openCertBtn.title = 'Open certificate in a new tab';
+        } else {
+          openCertBtn.disabled = true;
+          openCertBtn.title = 'Certificate unavailable (no receipt ID loaded)';
+        }
       }
 
       // Verify (demo returns ok)
