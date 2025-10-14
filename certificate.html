@@ -5,6 +5,22 @@
   <title>MirrorVault — Verification Certificate</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+  <!-- inside <head> -->
+<style>
+  .cert::before {
+    content: "";
+    position: absolute; inset: 0;
+    background-repeat: no-repeat;
+    background-position: center 38%;
+    background-size: 3.8in 3.8in;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.45;
+    background-image:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCA1MTIgNTEyJz48ZGVmcz48cmFkaWFsR3JhZGllbnQgaWQ9J2cnIGN4PSc1MCUnIGN5PSc1MCUnIHI9JzUwJSc+PHN0b3Agb2Zmc2V0PScwJScgc3RvcC1jb2xvcj0nI2Q2YjE2OCcgc3RvcC1vcGFjaXR5PScwLjc1Jy8+PHN0b3Agb2Zmc2V0PScxMDAlJyBzdG9wLWNvbG9yPScjZDZiMTY4JyBzdG9wLW9wYWNpdHk9JzAnLz48L3JhZGlhbEdyYWRpZW50PjwvZGVmcz48Y2lyY2xlIGN4PScyNTYnIGN5PScyNTYnIHI9JzI1MCcgZmlsbD0ndXJsKCNnKScvPjxjaXJjbGUgY3g9JzI1NicgY3k9JzI1Nicgcj0nMjAwJyBmaWxsPSdub25lJyBzdHJva2U9JyNkNmIxNjgnIHN0cm9rZS13aWR0aD0nOCcgc3Ryb2tlLW9wYWNpdHk9Jy42NScvPjxwYXRoIGQ9J00yNTYgMTAwIEwxOTAgMzUwIEwzMjIgMzUwIFonIGZpbGw9J25vbmUnIHN0cm9rZT0nI2Q2YjE2OCcgc3Ryb2tlLXdpZHRoPScxMCcgc3Ryb2tlLW9wYWNpdHk9Jy43Jy8+PHRleHQgeD0nNTAlJyB5PScyODUnIHRleHQtYW5jaG9yPSdtaWRkbGUnIGZvbnQtZmFtaWx5PSdHZW9yZ2lhLHNlcmlmJyBmb250LXNpemU9JzQwJyBmaWxsPScjZDZiMTY4JyBmaWxsLW9wYWNpdHk9Jy41NSc+TUlSUk9SVkFVTFRPCjwvdGV4dD48L3N2Zz4=");
+  }
+  @media print { .cert::before { opacity:0.25; } }
+</style>
+
   <!-- Print-friendly (system fonts), CSP-safe (no external assets) -->
   <style>
     :root { --cream:#f9f6f1; --black:#1a1a1a; --gold:#d6b168; }
@@ -49,6 +65,24 @@
       background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCA1MTIgNTEyJz48ZGVmcz48cmFkaWFsR3JhZGllbnQgaWQ9J2cnIGN4PSc1MCUnIGN5PSc1MCUnIHI9JzUwJSc+PHN0b3Agb2Zmc2V0PScwJScgc3RvcC1jb2xvcj0nI2Q2YjE2OCcgc3RvcC1vcGFjaXR5PScwLjc1Jy8+PHN0b3Agb2Zmc2V0PScxMDAlJyBzdG9wLWNvbG9yPScjZDZiMTY4JyBzdG9wLW9wYWNpdHk9JzAnLz48L3JhZGlhbEdyYWRpZW50PjwvZGVmcz48Y2lyY2xlIGN4PScyNTYnIGN5PScyNTYnIHI9JzI1MCcgZmlsbD0ndXJsKCNnKScvPjxjaXJjbGUgY3g9JzI1NicgY3k9JzI1Nicgcj0nMjAwJyBmaWxsPSdub25lJyBzdHJva2U9JyNkNmIxNjgnIHN0cm9rZS13aWR0aD0nOCcgc3Ryb2tlLW9wYWNpdHk9Jy42NScvPjxwYXRoIGQ9J00yNTYgMTAwIEwxOTAgMzUwIEwzMjIgMzUwIFonIGZpbGw9J25vbmUnIHN0cm9rZT0nI2Q2YjE2OCcgc3Ryb2tlLXdpZHRoPScxMCcgc3Ryb2tlLW9wYWNpdHk9Jy43Jy8+PHRleHQgeD0nNTAlJyB5PScyODUnIHRleHQtYW5jaG9yPSdtaWRkbGUnIGZvbnQtZmFtaWx5PSdHZW9yZ2lhLHNlcmlmJyBmb250LXNpemU9JzQwJyBmaWxsPScjZDZiMTY4JyBmaWxsLW9wYWNpdHk9Jy41NSc+TUlSUk9SVkFVTFRPCjwvdGV4dD48L3N2Zz4=");
     }
 
+    /* Fallback watermark img element (only enabled via JS if needed) */
+.cert .wm-fallback {
+  position: absolute;
+  inset: 0;
+  width: 3.8in; height: 3.8in;
+  margin: 0 auto;
+  left: 0; right: 0; top: 38%;
+  transform: translateY(-38%);
+  object-fit: contain;
+  opacity: 0.45;           /* match onscreen opacity */
+  pointer-events: none;
+  z-index: 0;
+  display: none;           /* JS will enable only if needed */
+}
+@media print {
+  .cert .wm-fallback { opacity: 0.25; }
+}
+
     /* content above watermark */
     .cert > * { position: relative; z-index: 1; }
 
@@ -84,6 +118,14 @@
 
   <!-- Certificate canvas -->
   <main class="cert" role="document" aria-label="MirrorVault Verification Certificate">
+
+<img
+  class="wm-fallback"
+  alt=""
+  aria-hidden="true"
+  src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCA1MTIgNTEyJz48ZGVmcz48cmFkaWFsR3JhZGllbnQgaWQ9J2cnIGN4PSc1MCUnIGN5PSc1MCUnIHI9JzUwJSc+PHN0b3Agb2Zmc2V0PScwJScgc3RvcC1jb2xvcj0nI2Q2YjE2OCcgc3RvcC1vcGFjaXR5PScwLjc1Jy8+PHN0b3Agb2Zmc2V0PScxMDAlJyBzdG9wLWNvbG9yPScjZDZiMTY4JyBzdG9wLW9wYWNpdHk9JzAnLz48L3JhZGlhbEdyYWRpZW50PjwvZGVmcz48Y2lyY2xlIGN4PScyNTYnIGN5PScyNTYnIHI9JzI1MCcgZmlsbD0ndXJsKCNnKScvPjxjaXJjbGUgY3g9JzI1NicgY3k9JzI1Nicgcj0nMjAwJyBmaWxsPSdub25lJyBzdHJva2U9JyNkNmIxNjgnIHN0cm9rZS13aWR0aD0nOCcgc3Ryb2tlLW9wYWNpdHk9Jy42NScvPjxwYXRoIGQ9J00yNTYgMTAwIEwxOTAgMzUwIEwzMjIgMzUwIFonIGZpbGw9J25vbmUnIHN0cm9rZT0nI2Q2YjE2OCcgc3Ryb2tlLXdpZHRoPScxMCcgc3Ryb2tlLW9wYWNpdHk9Jy43Jy8+PHRleHQgeD0nNTAlJyB5PScyODUnIHRleHQtYW5jaG9yPSdtaWRkbGUnIGZvbnQtZmFtaWx5PSdHZW9yZ2lhLHNlcmlmJyBmb250LXNpemU9JzQwJyBmaWxsPScjZDZiMTY4JyBmaWxsLW9wYWNpdHk9Jy41NSc+TUlSUk9SVkFVTFRPCjwvdGV4dD48L3N2Zz4=" />
+
+    
     <header class="header">
       <h1 class="title">MirrorVault Verification Certificate</h1>
       <p class="subtitle">Cryptographic proof of authenticity and provenance</p>
@@ -188,5 +230,55 @@
       }
     })();
   </script>
+
+<script>
+  (function ensureWatermarkVisible(){
+    const cert = document.querySelector('.cert');
+    if (!cert) return;
+    // compute ::before opacity — if it's 0 or missing, enable fallback <img>
+    const before = getComputedStyle(cert, '::before');
+    const hasBG = before.backgroundImage && before.backgroundImage !== 'none';
+    const op = parseFloat(before.opacity || '0');
+    if (!hasBG || op === 0) {
+      const img = document.querySelector('.cert .wm-fallback');
+      if (img) img.style.display = 'block';
+    }
+    // also support press boost flag for <img> fallback
+    const wm = new URLSearchParams(location.search).get('wm');
+    if (wm === 'hi') {
+      cert.style.setProperty('--wm-size', '4.6in');
+      if (document.querySelector('.cert .wm-fallback')) {
+        const im = document.querySelector('.cert .wm-fallback');
+        im.style.backgroundSize = '4.6in 4.6in';
+        im.style.opacity = '0.58';
+      }
+    }
+  })();
+</script>
+
+  <!-- before </body> -->
+<script>
+  // Press-boost watermark: auto-on, or controlled by ?wm flag
+  (function pressBoost(){
+    const q = new URLSearchParams(location.search);
+    const wm = q.get('wm');
+    // always-on mode OR explicit ?wm=hi
+    if (wm === 'hi' || !wm) {
+      const st = document.createElement('style');
+      st.textContent = `
+        .cert::before {
+          opacity: 0.58 !important;
+          background-size: 4.6in 4.6in !important;
+        }`;
+      document.head.appendChild(st);
+    }
+    if (wm === 'debug') {
+      const st = document.createElement('style');
+      st.textContent = `.cert::before { outline: 2px dashed rgba(214,177,104,.8); }`;
+      document.head.appendChild(st);
+    }
+  })();
+</script>
+  
 </body>
 </html>
