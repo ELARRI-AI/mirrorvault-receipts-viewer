@@ -25,6 +25,11 @@
       margin:.3rem 0 .7rem; font-weight:700; color:#1f7a1f;
     }
 
+.status-bar.ok { color:#1f7a1f; }
+.status-bar.fail { color:#9b1c1c; }
+.status-bar.warn { color:#9b6b00; }
+
+    
     .grid{ display:grid; grid-template-columns:1fr 1fr; gap:1.25rem; }
     .card{ border:1px solid #eee; border-left:4px solid var(--gold); padding:1.15rem; border-radius:8px; background:#fff; }
     .card h3{ margin:0 0 .6rem; }
@@ -204,14 +209,26 @@
     return m ? m[1] : null;
   }
   function safeText(x){ return (x===undefined || x===null || x==="") ? "—" : String(x); }
-  function setBadge(status, text){
-    const el = document.getElementById("statusBadge"); if(!el) return;
-    el.className = "badge";
-    if (status==="ok") el.classList.add("ok");
-    else if (status==="warn") el.classList.add("warn");
-    else if (status==="fail") el.classList.add("fail");
-    el.textContent = text;
+ function setBadge(status, text){
+  const el = document.getElementById("statusBadge");
+  const bar = document.querySelector(".status-bar");
+  if(!el) return;
+
+  el.className = "badge";
+  if (status==="ok") el.classList.add("ok");
+  else if (status==="warn") el.classList.add("warn");
+  else if (status==="fail") el.classList.add("fail");
+  el.textContent = text;
+
+  // update the status bar color and text
+  if (bar) {
+    bar.className = "status-bar " + status;
+    if (status === "ok") bar.textContent = "✓ Verified";
+    else if (status === "warn") bar.textContent = "⚠ Verification Warning";
+    else if (status === "fail") bar.textContent = "✗ Verification Failed";
   }
+}
+
 
   // data fetchers
   async function fetchReceipt(id){
